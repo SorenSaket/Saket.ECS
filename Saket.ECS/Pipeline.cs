@@ -6,6 +6,21 @@ using System.Threading.Tasks;
 using System.Reflection;
 namespace engine.ecs
 {
+    // Pipline
+    // The purpose of the pipeline is to describe the system behaviour of a world
+    // Order of stage execution
+    // 
+
+    // Stage: 
+    // Control when a system is ran (fixed timestep or conditional)
+    // Control Parallel execution
+    // 
+    // 
+
+
+    // Auto injection of method parameters
+    // Invokation using fast dyamic invoke
+
     internal class Pipeline
     {
         public List<Stage> stages;
@@ -17,18 +32,14 @@ namespace engine.ecs
                 stages[i].
             }
         }
-
+        // 
         public void AddStage(ISystem stage)
         {
             stages.Add(new Stage(stage));
         }
 
-
         public void AddStage(Delegate stage)
         {
-            stage.GetMethodInfo().GetParameters();
-            stage.DynamicInvoke(null, new object[] { stage });
-
             stages.Add(new Stage(stage));
         }
 

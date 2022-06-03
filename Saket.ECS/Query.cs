@@ -7,7 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace engine.ecs
-{/*
+{
+    // A query is 
+    // able to split acess to components between threads
+    // 
+    //
+
+    public class Query
+    {
+        public int Count;
+    }
+    /*
     public ref struct QueryResult<T1>
          where T1 : unmanaged
     {
@@ -21,10 +31,6 @@ namespace engine.ecs
         public Span<T2> span2;
     }
 
-    public class Query
-    {
-        public int Count;
-    }
 
     public class Query<T1> : Query
         where T1 : unmanaged

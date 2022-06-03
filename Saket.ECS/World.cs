@@ -18,6 +18,7 @@ namespace engine.ecs
 
     internal class World
     {
+        // TOOD make single pipeline
         public List<Pipeline> pipelines;
         //
         public List<Archetype> archetypes;
@@ -67,7 +68,7 @@ namespace engine.ecs
             }
             else
             {
-                throw new Exception("Entity is already destoryed");
+                throw new Exception("Entity is already destroyed");
             }
 
         }
