@@ -29,13 +29,13 @@ namespace engine.ecs
         {
             for (int i = 0; i < stages.Count; i++)
             {
-                stages[i].
+                //stages[i].
             }
         }
         // 
         public void AddStage(ISystem stage)
         {
-            stages.Add(new Stage(stage));
+            //stages.Add(new Stage(stage));
         }
 
         public void AddStage(Delegate stage)

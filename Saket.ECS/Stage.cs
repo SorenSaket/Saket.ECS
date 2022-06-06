@@ -40,7 +40,7 @@ namespace engine.ecs
                 }
             }
 
-
+            // http://www.tomdupont.net/2016/11/10x-faster-than-delegatedynamicinvoke.html
             _delegate.DynamicInvoke(args);
 
         }

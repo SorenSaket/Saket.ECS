@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saket.ECS", "Saket.ECS\Saket.ECS.csproj", "{F3B7D3F6-4502-48D3-890B-4A1C2584B140}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saket.ECS", "Saket.ECS\Saket.ECS.csproj", "{F3B7D3F6-4502-48D3-890B-4A1C2584B140}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saket.ECS.Tests", "Saket.ECS.Tests\Saket.ECS.Tests.csproj", "{0EDF81E7-F8FA-4371-A5EF-74AB70F1D0D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saket.ECS.Benchmark", "Saket.ECS.Benchmark\Saket.ECS.Benchmark.csproj", "{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{F3B7D3F6-4502-48D3-890B-4A1C2584B140}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3B7D3F6-4502-48D3-890B-4A1C2584B140}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3B7D3F6-4502-48D3-890B-4A1C2584B140}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EDF81E7-F8FA-4371-A5EF-74AB70F1D0D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDF81E7-F8FA-4371-A5EF-74AB70F1D0D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDF81E7-F8FA-4371-A5EF-74AB70F1D0D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDF81E7-F8FA-4371-A5EF-74AB70F1D0D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

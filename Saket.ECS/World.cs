@@ -53,12 +53,11 @@ namespace engine.ecs
         public Entity CreateEntity()
         {
             // Search for
-            
+            var a = new EntityPointer();
 
-            entities.Add(new EntityPointer());
+            entities.Add(a);
 
-
-            return new Entity(this, null);
+            return new Entity(this, a);
         }
         public void DestroyEntity(int id_entity)
         {
