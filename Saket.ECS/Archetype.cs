@@ -44,7 +44,6 @@ namespace engine.ecs
         {
             int index_component = IndexOfComponent<T>();
 
-
             if (index_component != -1)
             {
                 return storage[index_component].Get<T>(index_element);
@@ -54,6 +53,24 @@ namespace engine.ecs
                 throw new Exception("Archetype does not contain component");
             }
         }
+
+        public void Set<T>(int index_element, T value)
+            where T : unmanaged
+        {
+            int index_component = IndexOfComponent<T>();
+
+            if (index_component != -1)
+            {
+                storage[index_component].Set<T>(index_element, value);
+            }
+            else
+            {
+                throw new Exception("Archetype does not contain component");
+            }
+        }
+
+
+
 
         private int IndexOfComponent<T>()
         {

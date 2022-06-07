@@ -21,26 +21,21 @@ namespace engine.ecs
     // Auto injection of method parameters
     // Invokation using fast dyamic invoke
 
-    internal class Pipeline
+    public class Pipeline
     {
         public List<Stage> stages;
 
-        public void Update(float delta)
+        public Pipeline()
+        {
+            stages = new List<Stage>();
+        }
+
+        internal void Update(World world)
         {
             for (int i = 0; i < stages.Count; i++)
             {
-                //stages[i].
+                stages[i].Update(world);
             }
-        }
-        // 
-        public void AddStage(ISystem stage)
-        {
-            //stages.Add(new Stage(stage));
-        }
-
-        public void AddStage(Delegate stage)
-        {
-            stages.Add(new Stage(stage));
         }
 
         public void AddStage(Stage stage)

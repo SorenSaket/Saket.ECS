@@ -13,7 +13,10 @@ using FastDelegate.Net;
 // DynamicInvoke    2685.60
 // FastDelegateNet  30 
 //
-[SimpleJob(RunStrategy.Monitoring, targetCount: 5)]
+
+
+
+    [SimpleJob(RunStrategy.Monitoring, targetCount: 5)]
     public class Test_DynamicInvoke
     {
         Delegate _delegate;
@@ -30,7 +33,7 @@ using FastDelegate.Net;
             invoker = EfficientInvoker.ForDelegate(_delegate);
             fastdel = _delegate.Method.Bind();
 
-        }
+    }
 
         float del(float delta, string data)
         {
@@ -54,7 +57,9 @@ using FastDelegate.Net;
                 _delegate.DynamicInvoke(args);
             }
         }
-        [Benchmark]
+
+        // Not working
+        //[Benchmark]
         public void EfficientDynamicInvoke()
         {
             for (int i = 0; i < 10000; i++)

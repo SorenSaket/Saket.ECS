@@ -10,7 +10,7 @@ namespace engine.ecs
     /// A Handle to an entity
     /// Allows 
     /// </summary>
-    ref struct Entity
+    public struct Entity
     {
         public EntityPointer EntityPointer { get; private set; }
         public readonly World World { get; }
@@ -21,10 +21,12 @@ namespace engine.ecs
             this.EntityPointer = pointer;
         }
 
+
         public void Add(Bundle bundle)
         {
 
         }
+
         public void Add<T>()
         {
 
@@ -40,9 +42,10 @@ namespace engine.ecs
             return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
         }
 
-        public void Set<T>()
+        public void Set<T>(T value)
+             where T : unmanaged
         {
-
+            World.archetypes[EntityPointer.index_archetype].Set<T>(EntityPointer.index_row, value);
         }
 
     }

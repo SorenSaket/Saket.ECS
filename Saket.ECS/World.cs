@@ -9,22 +9,27 @@ using System.Collections;
 
 namespace engine.ecs
 {
-    struct EntityPointer
+    public struct EntityPointer
     {
         public int version;
         public int index_archetype;
         public int index_row;
     }
 
-    internal class World
+    public class World
     {
-        // TOOD make single pipeline
-        public List<Pipeline> pipelines;
+        public float Delta { get; private set; }
+
+        public Pipeline pipeline;
         //
         public List<Archetype> archetypes;
 
         public List<EntityPointer> entities;
         public BitArray activeEntities; // false = destoryed, true = alive
+
+        // Maintain query when objects are added/removed
+        protected List<Query> queries;
+
 
         public object lock_entity;
 
@@ -40,10 +45,8 @@ namespace engine.ecs
 
         public void Update(float delta)
         {
-            for (int i = 0; i < pipelines.Count; i++)
-            {
-                pipelines[i].Update(delta);
-            }
+            Delta = delta;
+            pipeline.Update(this);
         }
 
 
@@ -71,9 +74,10 @@ namespace engine.ecs
             }
 
         }
-        public void AddPipeline(Pipeline pipeline)
+
+        public void SetPipeline(Pipeline pipeline)
         {
-            this.pipelines.Add(pipeline);
+            this.pipeline = pipeline;
         }
     }
 }
