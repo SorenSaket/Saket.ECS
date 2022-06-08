@@ -8,8 +8,12 @@ using FastDelegate.Net;
 
 namespace engine.ecs
 {
-    
-
+    /// <summary> 
+    /// Control when a system is ran (fixed timestep or conditional).
+    /// Control Parallel execution.
+    /// Auto injection of method parameters.
+    /// Invokation using fast dyamic invoke.
+    /// </summary>
     public class Stage
     {
         //delegate Object SystemFunction (Object instance, Object[] arguments);
@@ -51,26 +55,25 @@ namespace engine.ecs
             }
         }
 
-
-        List<System> systems;
+        List<System> dynamicSystems;
 
         //
         public Stage()
         {
-            systems = new List<System>();
+            dynamicSystems = new List<System>();
         }
 
         public void AddSystem(Delegate @delegate)
         {
-            systems.Add(new System(@delegate));
+            dynamicSystems.Add(new System(@delegate));
         }
 
 
         internal void Update(World world)
         {
-            for (int i = 0; i < systems.Count; i++)
+            for (int i = 0; i < dynamicSystems.Count; i++)
             {
-                Invoke(systems[i], world);
+                Invoke(dynamicSystems[i], world);
             }
         }
 
@@ -88,6 +91,7 @@ namespace engine.ecs
                 // Get the query
                 // TODO
                 system.Arguments[system.ArgumentIndex_Query] = null;
+
             }
 
             //

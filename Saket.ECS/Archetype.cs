@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace engine.ecs
 {
@@ -15,22 +16,25 @@ namespace engine.ecs
     {
         // Hashcode, ID
         // ArchetypeIds are equal across application at runtime, but differ each run
+        // T
         public static Dictionary<int, int> ArchetypeIds = new Dictionary<int, int>();
-
 
         // idk
         public const int maxChunkSizeInBytes = 1024 * 16;
 
         public int id;
 
+        public int Count;
+
 
         ChunkedMultiArray[] storage;
         Type[] componentTypes;
+        private int componentHash = 0;
 
         public Archetype(Type[] components)
         {
             componentTypes = components;
-
+            componentHash = GetComponentGroupHashCode(components);
 
             storage = new ChunkedMultiArray[components.Length];
             for (int i = 0; i < components.Length; i++)
@@ -38,6 +42,7 @@ namespace engine.ecs
                 storage[i] = new ChunkedMultiArray(1024);
             }
         }
+
 
         public T Get<T>(int index_element)
             where T : unmanaged
@@ -69,7 +74,11 @@ namespace engine.ecs
             }
         }
 
-
+        public T Get<T>(int index_component, int index_element)
+           where T : unmanaged
+        {
+            return storage[index_component].Get<T>(index_element);
+        }
 
 
         private int IndexOfComponent<T>()
@@ -81,6 +90,12 @@ namespace engine.ecs
             }
 
             return -1;
+        }
+
+
+        public int GetID()
+        {
+            return componentHash;
         }
 
         // Does this work??

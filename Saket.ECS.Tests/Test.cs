@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections;
 
 namespace engine.ecs
 {
@@ -36,8 +37,14 @@ namespace engine.ecs
         }
         public static implicit operator Velocity(Vector2 v) => new Velocity(v);
     }
+    struct Hat : IComponent
+    {
+        
+    }
+    struct Pants : IComponent
+    {
 
-
+    }
     public class Test
     {
         World world;
@@ -70,11 +77,29 @@ namespace engine.ecs
             world.Update(delta);
         }
 
-        void SystemMove(float delta, Query<Position, Velocity> query)
+        void SystemMove(float delta, Query<Position, Velocity, Or<(Pants, Hat)>> query)
         {
-            foreach (var (entity, positition, velocity) in query)
+            foreach (var entity in query)
             {
-                entity.Set<Position>(positition.Value + (velocity.Value * delta));
+                // Move the entity forward
+                var position = entity.Get<Position>();
+                var velocity = entity.Get<Velocity>();
+                
+                entity.Set<Position>(position.Value + (velocity.Value * delta));
+
+                var pants = entity.TryGet<Pants>();
+                var hat = entity.TryGet<Hat>();
+
+                if (hat.HasValue)
+                {
+                    // Do something with the hat
+                   // hat.Value 
+                }
+
+                if(pants.HasValue)
+                {
+                    // Do something with the pants
+                }
             }
         }
     }

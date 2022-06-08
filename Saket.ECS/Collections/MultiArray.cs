@@ -124,5 +124,35 @@ namespace engine.ecs.collections
         {
             return (byte*)data.ToPointer() + offsets[field];
         }
+
+
+        public static int GetStoredSizeinBytes(Type type)
+        {
+            int size = 0;
+            // Get the field of the type
+            var fields = type.GetFields();
+
+            // Intialize arrays
+
+            var offsets = new int[fields.Length];
+
+            // 
+            for (int i = 0; i < fields.Length; i++)
+            {
+                // Offset in struct
+                offsets[i] = Marshal.OffsetOf(type, fields[i].Name).ToInt32();
+            }
+
+            for (int i = 0; i < fields.Length; i++)
+            {
+                // The size in bytes for each field Type is either it's Marshal.SizeOf()
+                // Or is determined by delta in explicit layout
+                if (i != fields.Length - 1)
+                    size += Math.Min(Marshal.SizeOf(fields[i].FieldType), offsets[i + 1] - offsets[i]);
+                else
+                    size += Marshal.SizeOf(fields[i].FieldType);
+            }
+            return size;
+        }
     }
 }

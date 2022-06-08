@@ -24,20 +24,40 @@ namespace engine.ecs
 
         public void Add(Bundle bundle)
         {
+            if(EntityPointer.index_archetype == -1)
+            {
 
+            }
+            else
+            {
+                // Move
+
+            }
         }
 
         public void Add<T>()
+             where T : unmanaged
         {
-
+            // Entity already has component
+            // return warning
+            // Get or create new archetype
+            // Add Component 
         }
+
         public void Remove<T>()
+             where T : unmanaged
         {
 
         }
 
         public T Get<T>()
             where T : unmanaged
+        {
+            return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
+        }
+
+        public T? TryGet<T>()
+          where T : unmanaged
         {
             return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
         }

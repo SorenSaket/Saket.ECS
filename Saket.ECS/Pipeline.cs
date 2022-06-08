@@ -11,15 +11,7 @@ namespace engine.ecs
     // Order of stage execution
     // 
 
-    // Stage: 
-    // Control when a system is ran (fixed timestep or conditional)
-    // Control Parallel execution
-    // 
-    // 
-
-
-    // Auto injection of method parameters
-    // Invokation using fast dyamic invoke
+   
 
     public class Pipeline
     {

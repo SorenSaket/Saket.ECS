@@ -14,6 +14,13 @@ namespace engine.ecs
         public int version;
         public int index_archetype;
         public int index_row;
+
+        public EntityPointer(int version, int index_archetype, int index_row)
+        {
+            this.version = version;
+            this.index_archetype = index_archetype;
+            this.index_row = index_row;
+        }
     }
 
     public class World
@@ -30,7 +37,6 @@ namespace engine.ecs
         // Maintain query when objects are added/removed
         protected List<Query> queries;
 
-
         public object lock_entity;
 
         public World()
@@ -41,18 +47,11 @@ namespace engine.ecs
             this.activeEntities = new BitArray(initialSize);
         }
 
-
-
         public void Update(float delta)
         {
             Delta = delta;
             pipeline.Update(this);
         }
-
-
-
-
-        
         public Entity CreateEntity()
         {
             // Search for
@@ -74,10 +73,30 @@ namespace engine.ecs
             }
 
         }
-
         public void SetPipeline(Pipeline pipeline)
         {
             this.pipeline = pipeline;
+        }
+
+        internal void QueryUpdate()
+        {
+
+        }
+
+        internal Archetype CreateOrGetArchetype(Type[] types)
+        {
+            int hash = Archetype.GetComponentGroupHashCode(types);
+            for (int i = 0; i < archetypes.Count; i++)
+            {
+                if(archetypes[i].GetID() == hash)
+                {
+                    return archetypes[i];
+                }
+            }
+
+            var arc = new Archetype(types);
+            archetypes.Add(arc);
+            return arc;
         }
     }
 }
