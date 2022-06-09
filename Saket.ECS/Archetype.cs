@@ -1,13 +1,6 @@
-﻿using engine.ecs.collections;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using Saket.ECS.collections;
 
-namespace engine.ecs
+namespace Saket.ECS
 {
     /// <summary>
     /// 
@@ -16,8 +9,9 @@ namespace engine.ecs
     {
         // Hashcode, ID
         // ArchetypeIds are equal across application at runtime, but differ each run
-        // T
         public static Dictionary<int, int> ArchetypeIds = new Dictionary<int, int>();
+
+
 
         // idk
         public const int maxChunkSizeInBytes = 1024 * 16;
@@ -26,14 +20,15 @@ namespace engine.ecs
 
         public int Count;
 
-
         ChunkedMultiArray[] storage;
-        Type[] componentTypes;
+        public Type[] ComponentTypes { get; private set; }
         private int componentHash = 0;
+
+        public Stack<int> avaliableRows = new Stack<int>();
 
         public Archetype(Type[] components)
         {
-            componentTypes = components;
+            ComponentTypes = components;
             componentHash = GetComponentGroupHashCode(components);
 
             storage = new ChunkedMultiArray[components.Length];
@@ -41,6 +36,23 @@ namespace engine.ecs
             {
                 storage[i] = new ChunkedMultiArray(1024);
             }
+        }
+
+
+        public void Add<T>(T value)
+            where T : unmanaged
+        {
+            int index = Count;
+            if(avaliableRows.Count > 0)
+            {
+                index = avaliableRows.Pop();
+            }
+            else
+            {
+                Count++;
+            }
+
+            Set<T>(index, value);
         }
 
 
@@ -83,9 +95,9 @@ namespace engine.ecs
 
         private int IndexOfComponent<T>()
         {
-            for (int i = 0; i < componentTypes.Length; i++)
+            for (int i = 0; i < ComponentTypes.Length; i++)
             {
-                if (componentTypes[i] == typeof(T))
+                if (ComponentTypes[i] == typeof(T))
                     return i;
             }
 
@@ -98,20 +110,17 @@ namespace engine.ecs
             return componentHash;
         }
 
-        // Does this work??
         public static int GetComponentGroupHashCode(Type[] components)
         {
-            // Wrap around
-            unchecked
-            {
-                int hash = 0;
-                for (int i = 0; i < components.Length; i++)
-                {
-                    hash += components[i].GetHashCode();
-                }
-                return hash;
-            }
-        }
+            // Sort to remove order variance
+            Array.Sort(components,(x,y) => x.Name.CompareTo(y.Name));
 
+            var hash = new HashCode();
+            for (int i = 0; i < components.Length; i++)
+            {
+                hash.Add( components[i]);
+            }
+            return hash.ToHashCode();
+        }
     }
 }

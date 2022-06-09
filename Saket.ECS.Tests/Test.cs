@@ -7,7 +7,7 @@ using System.Numerics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections;
 
-namespace engine.ecs
+namespace Saket.ECS
 {
     struct Position : IComponent
     {
@@ -45,6 +45,10 @@ namespace engine.ecs
     {
 
     }
+    struct Enemy : IComponent
+    {
+
+    }
     public class Test
     {
         World world;
@@ -56,7 +60,7 @@ namespace engine.ecs
 
             // Create stage
             var stage = new Stage();
-            stage.AddSystem(SystemMove);
+            stage.Add(SystemMove);
 
             // Create pipeline
             var pipeline = new Pipeline();
@@ -77,7 +81,10 @@ namespace engine.ecs
             world.Update(delta);
         }
 
-        void SystemMove(float delta, Query<Position, Velocity, Or<(Pants, Hat)>> query)
+        void SystemMove(float delta, 
+            Query<Position, Velocity, Without<Enemy>> query,
+            Query<Pants, Without<Hat>> query2
+            )
         {
             foreach (var entity in query)
             {

@@ -7,47 +7,59 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace engine.ecs
+namespace Saket.ECS
 {
+    public interface FilterItem { }
+
+
     /// <summary>
-    /// Garantees that at least one of the components are on the entity
+    /// Guarantees that at least one of the components are on the entity
     /// </summary>
     /// <typeparam name="T1"></typeparam>
-    public struct Or<T1>
+    public struct Any<T1> : FilterItem
           where T1 : unmanaged
     {
 
     }
-
     /// <summary>
-    /// Garantees that at none of the components are on the entity
+    /// Guarantees that all of the components are on the entity
     /// </summary>
     /// <typeparam name="T1"></typeparam>
-    public struct Without<T>
+    public struct With<T1> : FilterItem
+          where T1 : unmanaged
+    {
+
+    }
+    /// <summary>
+    /// Guarantees that at none of the components are on the entity
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    public struct Without<T> : FilterItem
         where T : unmanaged
     {
 
     }
 
-    /// <summary>
-    /// Garantees that at none of the components are on the entity
-    /// </summary>
-    /// <typeparam name="T1"></typeparam>
-    public struct AnyOf<T>
-        where T : unmanaged
-    {
+    
 
+
+    internal struct QueryFilter
+    {
+        public readonly Type[] Inclusive;
+        public readonly Type[] Exclusive;
+        public readonly Type[][] AnyGroups;
+        public readonly int Signature;
+
+        public QueryFilter(int signature, Type[] inclusive, Type[] exclusive, Type[][] anyGroups)
+        {
+            this.Signature = signature;
+            this.Inclusive = inclusive;
+            this.Exclusive = exclusive;
+            this.AnyGroups = anyGroups;
+        }
     }
 
-
-
-
-
-    // A query is 
-    // able to split acess to components between threads
     // 
-    // Queries should be able to iterate across multiple archetypes
-
     public struct QueryEnumerator : IEnumerator<Entity>
     {
         private Query query;
@@ -83,7 +95,7 @@ namespace engine.ecs
         {
             get
             {
-                return (T)(query[position]);
+                return (query[position]);
             }
         }
 
@@ -93,7 +105,7 @@ namespace engine.ecs
             {
                 try
                 {
-                    return query.GetEntity(position);
+                    return query[position];
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -104,58 +116,93 @@ namespace engine.ecs
     }
 
 
-    public static class QueryUtils
+    internal static class QueryUtils
     {
-        public static int GetQuerySignature(Type type)
+
+
+        internal static List<Type> GetComponentsGenerics(Type type)
+        {
+            List<Type> types =  new List<Type>();
+            Type[] generics = type.GetGenericArguments();
+
+            for (int i = 0; i < generics.Length; i++)
+            {
+                if(generics[i].IsAssignableFrom(typeof(Tuple)))
+                {
+                    types.AddRange(GetComponentsGenerics(generics[i]));
+                }
+                else
+                {
+                    types.Add(generics[i]);
+                }
+            }
+
+            return types;
+        }
+
+
+        internal static QueryFilter GetQueryFilter(Type type)
         {
             if(!type.IsAssignableTo(typeof(Query)))
             {
                 throw new Exception("type is not a query");
             }
-
+            
             Type[] generics = type.GetGenericArguments();
 
-            for (int i = 0; i < length; i++)
-            {
+            HashSet<Type> inclusive = new HashSet<Type>();
+            HashSet<Type> exclusive = new HashSet<Type>();
 
+            for (int i = 0; i < generics.Length; i++)
+            {
+                if(generics[i] == typeof(Any<>))
+                {
+                    
+                }
+                else if (generics[i] == typeof(Without<>))
+                {
+                    exclusive.UnionWith(GetComponentsGenerics(generics[i]));
+                }
+                else
+                {
+                    inclusive.UnionWith(GetComponentsGenerics(generics[i]));
+                }
             }
+
+            return new QueryFilter(type.GetHashCode(), inclusive.ToArray(), exclusive.ToArray(), null);
+        
         }
+
     }
 
 
-    public abstract class Query : IEnumerable<Entity>
+
+    /// <summary>
+    /// A query is 
+    /// able to split acess to components between threads
+    /// 
+    /// Queries should be able to iterate across multiple archetypes
+    /// </summary>
+    public class Query : IEnumerable<Entity>
     {
-        public int Count;
-        internal Archetype[] archetypes;
-        internal int[] archetypeSizes;
+        internal List<EntityPointer> entities;
+        public int Count { get; private set; }
+        public int Start { get; private set; }
+        public int End { get; private set; }
+        private readonly World world;
 
-        internal int start;
-        internal int end;
-
-        internal void SetArchetypes(Archetype[] archetypes)
+        internal Query(World world, List<EntityPointer> entities)
         {
-            this.archetypes = archetypes;
-            this.archetypeSizes = new int[archetypes.Length];
-            for (int i = 0; i < archetypes.Length; i++)
-            {
-                archetypeSizes[i] = archetypes[i].Count;
-            }
+            this.world = world;
+            this.entities = entities;
+            Start = 0;
+            End = Count = entities.Count;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int FloorIndex(int value, int[] arr)
-        {
-            for (int i = 1; i < arr.Length; i++)
-            {
-                if (value < arr[i])
-                    return i - 1;
+        public Entity this[int index]{
+            get {
+                return new Entity(world, entities[index]);
             }
-            return 0;
-        }
-
-        public Entity GetEntity(int position)
-        {
-            throw new NotImplementedException();
         }
 
         public IEnumerator<Entity> GetEnumerator()
@@ -170,7 +217,32 @@ namespace engine.ecs
 
     }
 
-    public class Query<T1> : Query where T1 : unmanaged {}
-    public class Query<T1, T2> : Query where T1 : unmanaged where T2 : unmanaged  {}
-    public class Query<T1, T2, T3> : Query where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged {}
+
+
+
+
+    public class Query<T1> : Query where T1 : unmanaged
+    {
+        public Query(World world, List<EntityPointer> entities) : base(world, entities)
+        {
+        }
+    }
+    public class Query<T1, T2> : Query where T1 : unmanaged where T2 : unmanaged
+    {
+        public Query(World world, List<EntityPointer> entities) : base(world, entities)
+        {
+        }
+    }
+    public class Query<T1, T2, T3> : Query where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged
+    {
+        public Query(World world, List<EntityPointer> entities) : base(world, entities)
+        {
+        }
+    }
+    public class Query<T1, T2, T3, T4> : Query where T1 : unmanaged where T2 : unmanaged where T3 : unmanaged where T4 : unmanaged
+    {
+        public Query(World world, List<EntityPointer> entities) : base(world, entities)
+        {
+        }
+    }
 }

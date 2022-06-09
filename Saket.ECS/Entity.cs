@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace engine.ecs
+namespace Saket.ECS
 {
     /// <summary>
     /// A Handle to an entity
@@ -34,7 +34,18 @@ namespace engine.ecs
 
             }
         }
+        public void Remove(Bundle bundle)
+        {
+            if (EntityPointer.index_archetype == -1)
+            {
 
+            }
+            else
+            {
+                // Move
+
+            }
+        }
         public void Add<T>()
              where T : unmanaged
         {
@@ -43,12 +54,17 @@ namespace engine.ecs
             // Get or create new archetype
             // Add Component 
         }
-
         public void Remove<T>()
              where T : unmanaged
         {
 
         }
+
+
+
+
+
+
 
         public T Get<T>()
             where T : unmanaged
@@ -59,6 +75,8 @@ namespace engine.ecs
         public T? TryGet<T>()
           where T : unmanaged
         {
+            // TODO Check if has component
+
             return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
         }
 

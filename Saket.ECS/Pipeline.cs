@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-namespace engine.ecs
+namespace Saket.ECS
 {
     // Pipline
     // The purpose of the pipeline is to describe the system behaviour of a world

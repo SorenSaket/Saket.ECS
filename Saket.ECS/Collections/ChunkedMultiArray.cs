@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace engine.ecs.collections
+namespace Saket.ECS.collections
 {
     public class ChunkedMultiArray
     {
@@ -47,7 +47,9 @@ namespace engine.ecs.collections
         public void Set<T>(int index, T item)
              where T : unmanaged
         {
-            
+            GetIndexes(index, out int index_chunk, out int index_element);
+
+            data[index_chunk].Set<T>(index_element, item);
         }
         public T Get<T>(int index)
              where T : unmanaged
