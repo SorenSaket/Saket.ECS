@@ -20,7 +20,7 @@ namespace Saket.ECS
 
         public int Count;
 
-        ChunkedMultiArray[] storage;
+        IComponentStorage[] storage;
         public Type[] ComponentTypes { get; private set; }
         private int componentHash = 0;
 
@@ -31,10 +31,10 @@ namespace Saket.ECS
             ComponentTypes = components;
             componentHash = GetComponentGroupHashCode(components);
 
-            storage = new ChunkedMultiArray[components.Length];
+            storage = new IComponentStorage[components.Length];
             for (int i = 0; i < components.Length; i++)
             {
-                storage[i] = new ChunkedMultiArray(1024);
+                storage[i] = new ComponentStorage(1024);
             }
         }
 
@@ -63,7 +63,7 @@ namespace Saket.ECS
 
             if (index_component != -1)
             {
-                return storage[index_component].Get<T>(index_element);
+                return (T)storage[index_component].Get(index_element);
             }
             else
             {
