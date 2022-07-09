@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Saket.ECS
+namespace Saket.ECS.Storage
 {
-    public delegate void DelegateSystem(World world);
-
-    public interface ISystem
+    internal class DummyStorage
     {
     }
 }

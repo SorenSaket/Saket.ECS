@@ -49,6 +49,9 @@ namespace Saket.ECS
 
             return new Entity(this, a);
         }
+
+
+
         public void DestroyEntity(int id_entity)
         {
             if(activeEntities[id_entity] == true)
@@ -61,78 +64,17 @@ namespace Saket.ECS
             }
         }
 
-        public void Add<T>(EntityPointer entity)
-            where T : unmanaged
+        public QueryResult Query(Query query)
         {
-            // Entity already has component
-            Archetype archetype = archetypes[entity.index_archetype];
-
-            if (archetype.ComponentTypes.Contains(typeof(T)))
+            if (!queries.ContainsKey(query.Signature))
             {
-                // return warning
-                return;
+                queries.Add(query.Signature, GetMatchingEntities(query));
             }
 
-            // Get or create new archetype
-            Type[] newComponents = new Type[archetype.ComponentTypes.Length + 1];
-            for (int i = 0; i < archetype.ComponentTypes.Length; i++)
-            {
-                newComponents[i] = archetypes[entity.index_archetype].ComponentTypes[i];
-            }
-            newComponents[^1] = typeof(T);
-
-            Archetype newArchetype = CreateOrGetArchetype(newComponents);
-
-            // Copy all values to new archtype
-            for (int i = 0; i < archetype.ComponentTypes.Length; i++)
-            {
-                archetype.Get<>(i, entity.index_row);
-            }
-
-
-
-            // Add Component 
+            return new QueryResult(this, queries[query.Signature]);
         }
 
-
-
-
-        internal void QueryUpdate()
-        {
-           /* foreach (var query in queries)
-            {
-                query.Value = GetMatchingEntities()
-            }*/
-        }
-
-
-        internal Query GetQuery(int signature)
-        {
-            if (queries.ContainsKey(signature))
-            {
-                return new Query(this,queries[signature]);
-            }
-            else
-            {
-                throw new ArgumentException("Query with signature does not exist");
-            }
-        }
-
-
-
-        internal void CreateQuery(QueryFilter query)
-        {
-            if (queries.ContainsKey(query.Signature))
-            {
-                return;
-            }
-
-            queries.Add(query.Signature, GetMatchingEntities(query));
-
-        }
-
-
-        internal List<EntityPointer> GetMatchingEntities(QueryFilter query) 
+        internal List<EntityPointer> GetMatchingEntities(Query query) 
         { 
             List<EntityPointer> r = new List<EntityPointer>();
 
@@ -161,20 +103,18 @@ namespace Saket.ECS
         /// <param name="components"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        internal bool Match(Type[] components, QueryFilter filter)
+        internal bool Match(Type[] components, Query filter)
         {
-            for (int i = 0; i < filter.Inclusive.Length; i++)
+            foreach (var item in filter.Inclusive)
             {
-                if (!components.Contains(filter.Inclusive[i]))
+                if (!components.Contains(item))
                     return false;
             }
-
-            for (int i = 0; i < filter.Exclusive.Length; i++)
+            foreach (var item in filter.Exclusive)
             {
-                if (components.Contains(filter.Exclusive[i]))
+                if (components.Contains(item))
                     return false;
             }
-
             return true;
         }
 
@@ -192,7 +132,7 @@ namespace Saket.ECS
             for (int i = 0; i < archetypes.Count; i++)
             {
                 // If combination already exists
-                if(archetypes[i].GetID() == hash)
+                if(archetypes[i].ID == hash)
                 {
                     return archetypes[i];
                 }

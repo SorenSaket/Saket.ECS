@@ -3,17 +3,17 @@
     /// <summary>
     /// 
     /// </summary>
-    public struct EntityPointer : IEquatable<EntityPointer>
+    public struct EntityPointer 
     {
         /// <summary>
         /// Current version
         /// </summary>
-        public int version;
+        public int version = 0;
         /// <summary>
         /// 
         /// </summary>
-        public int index_archetype;
-        public int index_row;
+        public int index_archetype = -1;
+        public int index_row = -1;
 
         public EntityPointer(int version, int index_archetype, int index_row)
         {

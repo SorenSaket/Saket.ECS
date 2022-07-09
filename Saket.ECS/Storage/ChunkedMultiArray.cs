@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Saket.ECS.collections
+namespace Saket.ECS.Storage
 {
     public class ChunkedMultiArray
     {

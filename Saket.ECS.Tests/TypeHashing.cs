@@ -16,7 +16,7 @@ namespace Saket.ECS.Tests
         /// Make sure types with generics have unqiue hashcodes
         /// Note that overlap is still theoretically and possibly practically possible.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void GenericHashing()
         {
             Assert.AreNotEqual(typeof(Query<Velocity>).GetHashCode(), typeof(Query<Position>).GetHashCode());
@@ -24,7 +24,7 @@ namespace Saket.ECS.Tests
             Assert.AreNotEqual(typeof(Query<Velocity,Position>).GetHashCode(), typeof(Query<Position,Velocity>).GetHashCode());
 
             Assert.AreNotEqual(typeof(Query<Velocity, Position>).GetHashCode(), typeof(Query<Position, Velocity>).GetHashCode());
-        }
+        }*/
 
         [TestMethod]
         public void TypeArrayHashing()

@@ -8,6 +8,10 @@ Heavy use of refection to make the library ergonomic.
 
 
 TODO:
+ Storage
+
+
+
 
 Complete requirements
 	Disabling of objects/components?
@@ -16,3 +20,6 @@ Complete requirements
 Complete Prototype
 
 Extensive Tests and Benchmarks
+
+
+http://igoro.com/archive/fun-with-c-generics-down-casting-to-a-generic-type/

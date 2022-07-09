@@ -10,7 +10,7 @@ namespace Saket.ECS
     /// A Handle to an entity
     /// Allows 
     /// </summary>
-    public struct Entity
+    public  struct Entity
     {
         public EntityPointer EntityPointer { get; private set; }
         public readonly World World { get; }
@@ -46,22 +46,58 @@ namespace Saket.ECS
 
             }
         }
-        public void Add<T>()
+        
+        /// <summary>
+        /// Adds component to entity
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public void Add<T>(T value)
              where T : unmanaged
         {
-            // Entity already has component
-            // return warning
-            // Get or create new archetype
-            // Add Component 
+            List<Type> newComponents = new List<Type>() { typeof(T) };
+            Archetype currentArchetype = null;
+            if (EntityPointer.index_archetype != -1)
+            {
+                currentArchetype = World.archetypes[EntityPointer.index_archetype];
+
+                // Entity already has component
+                if (currentArchetype.Has<T>())
+                {
+                    // TODO Consider not making exception
+                    throw new InvalidOperationException("Entity already has component");
+                }
+
+                // Get or create new archetype
+                newComponents.AddRange(currentArchetype.ComponentTypes);
+            }
+
+        
+            // Get archetype
+            Archetype newArchetype = World.CreateOrGetArchetype(newComponents.ToArray());
+            int entityIndex = newArchetype.AddEntity();
+      
+            if(currentArchetype != null)
+            {
+                // Copy old values to new archetype
+                for (int i = 0; i < currentArchetype.ComponentTypes.Length; i++)
+                {
+                    newArchetype.Set(i, entityIndex, currentArchetype.Get(i, entityIndex));
+                }
+            }
+           
+            // Set new value
+            newArchetype.Set(entityIndex, value);
         }
+       
+        /// <summary>
+        /// Removes component from entity
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public void Remove<T>()
              where T : unmanaged
         {
 
         }
-
-
-
 
 
 
@@ -85,7 +121,6 @@ namespace Saket.ECS
         {
             World.archetypes[EntityPointer.index_archetype].Set<T>(EntityPointer.index_row, value);
         }
-
     }
 
 }

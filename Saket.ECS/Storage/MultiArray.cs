@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Saket.ECS.collections
+namespace Saket.ECS.Storage
 {
 	// C# implementation of MultiArrayList in zig
 	// Uses Reflection to deterimine fields
@@ -27,7 +27,7 @@ namespace Saket.ECS.collections
         IntPtr data;
 
         /// <summary> Holds the size in bytes for all fields </summary>
-        System.Reflection.FieldInfo[] fields;
+        DelegateSystem.Reflection.FieldInfo[] fields;
         /// <summary> Holds the size in bytes for all fields </summary>
         int[] sizes;
         /// <summary> Holds the offset in bytes for all fields in current data structure </summary>
@@ -183,7 +183,7 @@ namespace Saket.ECS.collections
 		IntPtr data;
 
 		/// <summary> Holds the size in bytes for all fields </summary>
-		System.Reflection.FieldInfo[] fields;
+		DelegateSystem.Reflection.FieldInfo[] fields;
 		/// <summary> Holds the size in bytes for all fields </summary>
 		int[] sizes;
 		/// <summary> Holds the offset in bytes for all fields in current data structure </summary>

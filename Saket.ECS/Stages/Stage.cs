@@ -16,6 +16,7 @@ namespace Saket.ECS
     /// </summary>
     public class Stage
     {
+        /*
         //delegate Object SystemFunction (Object instance, Object[] arguments);
         /// <summary>
         /// Internal representation of a Dynamic System
@@ -29,11 +30,7 @@ namespace Saket.ECS
 
             public object[] Arguments;
 
-            public int ArgumentIndex_Delta;
-
-            public List<int> QueryIndexes;
-
-            public List<int> QuerieySignatures;
+            public int ArgumentIndex_World;
 
             public DynamicSystem(Delegate method)
             {
@@ -44,52 +41,50 @@ namespace Saket.ECS
                
                 
                 Arguments = new object[parameters.Length];
-                ArgumentIndex_Delta = -1;
-                QueryIndexes = new List<int>();
-                QuerieySignatures = new List<int>();
-
+                ArgumentIndex_World = -1;
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    if (parameters[i].ParameterType == typeof(float))
+                    if (parameters[i].ParameterType == typeof(World))
                     {
-                        if (parameters[i].Name.ToLowerInvariant() == "delta")
-                        {
-                            ArgumentIndex_Delta = i;
-                        }
-                    }
-                    else if (parameters[i].ParameterType == typeof(Query))
-                    {
-                        QueryIndexes.Add(i);
-                        QuerieySignatures.Add(parameters[i].ParameterType.GetHashCode());
+                        ArgumentIndex_World = i;
                     }
                 }
             }
         }
 
         List<DynamicSystem> dynamicSystems;
-
+        */
         //
+
+        List<DelegateSystem> systems;
+
         public Stage()
         {
-            dynamicSystems = new List<DynamicSystem>();
+            systems = new List<DelegateSystem>();
         }
-
+        /*
         public Stage Add(Delegate @delegate)
         {
             dynamicSystems.Add(new DynamicSystem(@delegate));
             return this;
-        }
+        }*/
 
+        public Stage Add(DelegateSystem @delegate)
+        {
+            systems.Add(@delegate);
+            return this;
+        }
 
         internal void Update(World world)
         {
-            for (int i = 0; i < dynamicSystems.Count; i++)
+            for (int i = 0; i < systems.Count; i++)
             {
-                Invoke(dynamicSystems[i], world);
+                systems[i].Invoke(world);
             }
         }
-        //
-        internal void Invoke(DynamicSystem system, World world)
+        ///
+       
+        /*internal void Invoke(DynamicSystem system, World world)
         {
             if(system.ArgumentIndex_Delta != -1)
             {
@@ -105,6 +100,6 @@ namespace Saket.ECS
 
             //
             system.SystemFunction.Invoke(system.Method.Target, system.Arguments);
-        }
+        }*/
     }
 }

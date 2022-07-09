@@ -49,12 +49,20 @@ namespace Saket.ECS
     {
 
     }
+
+    [TestClass]
     public class Test
     {
         World world;
 
+        Query query;
+
+        [TestMethod]
         public void Start()
         {
+            // Entities must both have position and velocity component
+            query = new Query().With<(Position,Velocity)>();
+            
             // Create new world
             world = new World();
 
@@ -81,32 +89,15 @@ namespace Saket.ECS
             world.Update(delta);
         }
 
-        void SystemMove(float delta, 
-            Query<Position, Velocity, Without<Enemy>> query,
-            Query<Pants, Without<Hat>> query2
-            )
+        void SystemMove(World world)
         {
-            foreach (var entity in query)
+            foreach (var entity in world.Query(query))
             {
                 // Move the entity forward
                 var position = entity.Get<Position>();
                 var velocity = entity.Get<Velocity>();
                 
-                entity.Set<Position>(position.Value + (velocity.Value * delta));
-
-                var pants = entity.TryGet<Pants>();
-                var hat = entity.TryGet<Hat>();
-
-                if (hat.HasValue)
-                {
-                    // Do something with the hat
-                   // hat.Value 
-                }
-
-                if(pants.HasValue)
-                {
-                    // Do something with the pants
-                }
+                entity.Set<Position>(position.Value + (velocity.Value * world.Delta));
             }
         }
     }
