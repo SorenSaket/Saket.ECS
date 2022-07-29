@@ -114,7 +114,6 @@ namespace Saket.ECS.Storage
             if (!typeof(T).Equals(ComponentType))
                 throw new ArgumentException("Object is not the same type as storage");
 #endif
-
             GetIndexes(index, out int index_chunk, out int index_element);
 #if DEBUG
             if (index_chunk >= chunks.Count || index_element >= numberOfItemsInChunk)
@@ -138,6 +137,7 @@ namespace Saket.ECS.Storage
 
         public void Set(int index, IntPtr item)
         {
+            EnsureSize(index);
             GetIndexes(index, out int index_chunk, out int index_element);
             Buffer.MemoryCopy(item.ToPointer(), ((byte*)chunks[index_chunk].ToPointer() + itemSizeInBytes * index_element), itemSizeInBytes, itemSizeInBytes);
             // memcpy(chunks[index_chunk] + itemSizeInBytes * index_element, item, itemSizeInBytes);
@@ -146,8 +146,16 @@ namespace Saket.ECS.Storage
         public IntPtr Get(int index)
         {
             GetIndexes(index, out int index_chunk, out int index_element);
-            byte* p = (byte*)chunks[index_chunk].ToPointer();
-            return new IntPtr((void*)p[index_element * itemSizeInBytes]);
+
+#if DEBUG
+            if (index_chunk >= chunks.Count || index_element >= numberOfItemsInChunk)
+                throw new ArgumentOutOfRangeException("Index out of range");
+#endif
+
+            byte* ptr_chunk = (byte*)chunks[index_chunk].ToPointer();
+            byte* ptr_element = &ptr_chunk[index_element * itemSizeInBytes];
+
+            return new IntPtr((void*)ptr_element);
         }
 
         #endregion

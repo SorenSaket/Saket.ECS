@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Saket.ECS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using System.Numerics;
 
 namespace Saket.ECS.Tests
 {
@@ -25,7 +25,34 @@ namespace Saket.ECS.Tests
 
             Assert.AreNotEqual(typeof(Query<Velocity, Position>).GetHashCode(), typeof(Query<Position, Velocity>).GetHashCode());
         }*/
+        struct Position : IComponent
+        {
+            public Vector2 Value;
 
+            public Position(float x, float y)
+            {
+                Value = new Vector2(x, y);
+            }
+            public Position(Vector2 value)
+            {
+                Value = value;
+            }
+            public static implicit operator Position(Vector2 v) => new Position(v);
+        }
+        struct Velocity : IComponent
+        {
+            public Vector2 Value;
+
+            public Velocity(float x, float y)
+            {
+                Value = new Vector2(x, y);
+            }
+            public Velocity(Vector2 value)
+            {
+                Value = value;
+            }
+            public static implicit operator Velocity(Vector2 v) => new Velocity(v);
+        }
         [TestMethod]
         public void TypeArrayHashing()
         {

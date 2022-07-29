@@ -1,6 +1,18 @@
 ﻿using BenchmarkDotNet.Running;
 using Saket.ECS;
+using System.Numerics;
 
+
+var test = new Test();
+test.Start();
+while (true)
+{
+    test.Update(1f / 60f);
+    Thread.Sleep(16);
+}
+
+
+/*
 //var a = new Test_DynamicInvoke();
 //a.EfficientDynamicInvoke();
 Console.WriteLine(LogicalProcessorInformation.Information.Length);
@@ -16,4 +28,4 @@ for (int i = 0; i < LogicalProcessorInformation.Information.Length; i++)
 
 
 //BenchmarkRunner.Run(typeof(Test_DynamicInvoke));
-Console.ReadKey();
+Console.ReadKey();*/

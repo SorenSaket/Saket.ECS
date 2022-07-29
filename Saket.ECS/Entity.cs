@@ -10,7 +10,7 @@ namespace Saket.ECS
     /// A Handle to an entity
     /// Allows 
     /// </summary>
-    public  struct Entity
+    public struct Entity
     {
         public EntityPointer EntityPointer { get; private set; }
         public readonly World World { get; }
@@ -54,6 +54,10 @@ namespace Saket.ECS
         public void Add<T>(T value)
              where T : unmanaged
         {
+            
+
+
+
             List<Type> newComponents = new List<Type>() { typeof(T) };
             Archetype currentArchetype = null;
             if (EntityPointer.index_archetype != -1)
@@ -69,26 +73,42 @@ namespace Saket.ECS
 
                 // Get or create new archetype
                 newComponents.AddRange(currentArchetype.ComponentTypes);
+
+                
             }
 
-        
             // Get archetype
-            Archetype newArchetype = World.CreateOrGetArchetype(newComponents.ToArray());
+            Archetype newArchetype = World.CreateOrGetArchetype(newComponents.ToArray(), out int newArchetypeIndex);
             int entityIndex = newArchetype.AddEntity();
       
             if(currentArchetype != null)
             {
                 // Copy old values to new archetype
+                // This can be done since the order of the components are the same
                 for (int i = 0; i < currentArchetype.ComponentTypes.Length; i++)
                 {
-                    newArchetype.Set(i, entityIndex, currentArchetype.Get(i, entityIndex));
+                    IntPtr source = currentArchetype.Get(i, entityIndex);
+                    newArchetype.Set(i, entityIndex, source);
                 }
+
+                // Remove from old  
+                currentArchetype.RemoveEntity(EntityPointer.index_row);
             }
            
             // Set new value
             newArchetype.Set(entityIndex, value);
+
+            // change the entity pointer
+            // TODO ALSO CHANGE IN THE WORLD
+
+            EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
+            World.entities[EntityPointer.ID] = EntityPointer;
         }
        
+
+
+
+
         /// <summary>
         /// Removes component from entity
         /// </summary>

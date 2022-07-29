@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -27,7 +28,7 @@ namespace Saket.ECS.Storage
         IntPtr data;
 
         /// <summary> Holds the size in bytes for all fields </summary>
-        DelegateSystem.Reflection.FieldInfo[] fields;
+        FieldInfo[] fields;
         /// <summary> Holds the size in bytes for all fields </summary>
         int[] sizes;
         /// <summary> Holds the offset in bytes for all fields in current data structure </summary>
@@ -183,7 +184,7 @@ namespace Saket.ECS.Storage
 		IntPtr data;
 
 		/// <summary> Holds the size in bytes for all fields </summary>
-		DelegateSystem.Reflection.FieldInfo[] fields;
+		FieldInfo[] fields;
 		/// <summary> Holds the size in bytes for all fields </summary>
 		int[] sizes;
 		/// <summary> Holds the offset in bytes for all fields in current data structure </summary>

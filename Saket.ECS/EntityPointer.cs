@@ -5,18 +5,20 @@
     /// </summary>
     public struct EntityPointer 
     {
+        public int ID;
         /// <summary>
         /// Current version
         /// </summary>
-        public int version = 0;
+        public int version;
         /// <summary>
         /// 
         /// </summary>
-        public int index_archetype = -1;
-        public int index_row = -1;
+        public int index_archetype;
+        public int index_row;
 
-        public EntityPointer(int version, int index_archetype, int index_row)
+        public EntityPointer(int ID, int version = 0, int index_archetype = -1, int index_row = -1)
         {
+            this.ID = ID;
             this.version = version;
             this.index_archetype = index_archetype;
             this.index_row = index_row;
@@ -28,13 +30,11 @@
         }
         public bool Equals(EntityPointer other)
         {
-            return version == other.version &&
-                   index_archetype == other.index_archetype &&
-                   index_row == other.index_row;
+            return ID == other.ID && version == other.version;
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(version, index_archetype, index_row);
+            return HashCode.Combine(ID,version);
         }
     }
 }
