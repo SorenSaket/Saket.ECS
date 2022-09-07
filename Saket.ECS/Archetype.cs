@@ -1,5 +1,10 @@
 ﻿using Saket.ECS.Storage;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+
+
 
 namespace Saket.ECS
 {
@@ -29,7 +34,7 @@ namespace Saket.ECS
         private readonly int componentHash = 0;
 
         /// <summary> Where the components are stored </summary>
-        IComponentStorage[] storage;
+        internal IComponentStorage[] storage;
 
         /// <summary>
         /// Create new Archetype store with desired Components
@@ -55,6 +60,7 @@ namespace Saket.ECS
         {
             if(avaliableRows.Count > 0)
             {
+                Count++;
                 return avaliableRows.Pop();
             }
             Capacity++;
@@ -153,12 +159,15 @@ namespace Saket.ECS
         {
             // Sort to remove order variance
             // TODO: is this needed?
-            Array.Sort(components,(x,y) => x.Name.CompareTo(y.Name));
+            var h = new Type[components.Length];
+            Array.Copy(components, h, components.Length);
+            Array.Sort(h, (x,y) => x.Name.CompareTo(y.Name));
+            // Remember that array is a refernce type so this will fuck up anything else in the callstack
 
             var hash = new HashCode();
-            for (int i = 0; i < components.Length; i++)
+            for (int i = 0; i < h.Length; i++)
             {
-                hash.Add(components[i]);
+                hash.Add(h[i]);
             }
             return hash.ToHashCode();
         }

@@ -14,7 +14,7 @@ namespace Saket.ECS
     /// Auto injection of method parameters.
     /// Invokation using fast dyamic invoke.
     /// </summary>
-    public class Stage
+    public class Stage : IStage
     {
         /*
         //delegate Object SystemFunction (Object instance, Object[] arguments);
@@ -56,18 +56,18 @@ namespace Saket.ECS
         */
         //
 
-        List<DelegateSystem> systems;
-
-        public Stage()
-        {
-            systems = new List<DelegateSystem>();
-        }
         /*
         public Stage Add(Delegate @delegate)
         {
             dynamicSystems.Add(new DynamicSystem(@delegate));
             return this;
         }*/
+        List<DelegateSystem> systems;
+
+        public Stage()
+        {
+            systems = new List<DelegateSystem>();
+        }
 
         public Stage Add(DelegateSystem @delegate)
         {
@@ -75,7 +75,7 @@ namespace Saket.ECS
             return this;
         }
 
-        internal void Update(World world)
+        public void Update(World world)
         {
             for (int i = 0; i < systems.Count; i++)
             {

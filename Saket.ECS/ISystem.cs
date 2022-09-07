@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Saket.ECS
 {
     public delegate void DelegateSystem(World world);
-
+    public delegate void DelegateSystemParallel(World world, int thread);
     public interface ISystem
     {
     }

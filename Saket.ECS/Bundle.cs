@@ -1,4 +1,6 @@
-﻿namespace Saket.ECS
+﻿using System;
+
+namespace Saket.ECS
 {
     public class Bundle
     {
@@ -7,6 +9,12 @@
         private Bundle(int count)
         {
             components = new Type[count];
+        }
+        public static Bundle Create(Type[] components)
+        {
+            var bundle = new Bundle(components.Length);
+            bundle.components = components;
+            return bundle;
         }
         public static Bundle Create(Type t1, Type t2) 
         {

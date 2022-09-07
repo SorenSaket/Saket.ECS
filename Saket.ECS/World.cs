@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿using Saket.ECS.Storage;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Saket.ECS
 {
@@ -8,51 +12,44 @@ namespace Saket.ECS
     /// </summary>
     public class World
     {
-        public float Delta { get; private set; }
+        /// <summary> Time delta in seconds </summary>
+        public float Delta { get; set; }
 
-        public Pipeline pipeline;
         //
         public List<Archetype> archetypes;
 
+        /// <summary> All the entities currently in the world. When entity is removed they still exists in this  </summary>
         public List<EntityPointer> entities;
 
         // Maintain query when objects are added/removed
-        internal Dictionary<int, List<EntityPointer>> queries;
+        // Queries maintain their valitidy troughout a single update since all modifcation (create/destroy, add/remove component) to entities are defered to end of update
+        // 
+        // the int indexes into entities list
+        internal Dictionary<int, QueryResult> queries;
+
+        // workaround is possible... remove.
+        // 
         internal Dictionary<int, bool> queriesdirty;
 
 
-
-        public object lock_entity;
 
         public World()
         {
             const int initialSize = 1024;
             this.archetypes = new List<Archetype>();
             this.entities = new List<EntityPointer>(initialSize);
-           // this.activeEntities = new BitArray(initialSize);
             queries = new();
             queriesdirty = new();
         }
-        public void SetPipeline(Pipeline pipeline)
-        {
-            this.pipeline = pipeline;
-        }
-        public void Update(float delta)
-        {
-            Delta = delta;
-            pipeline.Update(this);
-        }
-        
+
         public Entity CreateEntity()
         {
             // Search for
             var a = new EntityPointer(entities.Count, 0,-1,-1);
             entities.Add(a);
-
             var entity = new Entity(this, a);
             return entity;
         }
-
 
         /*
         public void DestroyEntity(int id_entity)
@@ -68,6 +65,9 @@ namespace Saket.ECS
             }
         }*/
 
+
+
+
         public QueryResult Query(Query query)
         {/*
             if (!queries.ContainsKey(query.Signature))
@@ -82,13 +82,17 @@ namespace Saket.ECS
             }
 
             return new QueryResult(this, queries[query.Signature]);*/
-            return new QueryResult(this, GetMatchingEntities(query));
-        }
 
-        internal List<EntityPointer> GetMatchingEntities(Query query) 
+            GetMatchingEntities(query, out var _entities, out var _archetypes);
+
+            return new QueryResult(this, _entities, _archetypes);
+        }
+        // Todo make allocation free
+        internal void GetMatchingEntities(Query query, out List<int> _entities, out List<int> _archetypes) 
         { 
             // List of all indexes of archetypes that match query
-            List<int> archetypeIds = new List<int>();
+            _archetypes = new List<int>();
+            
             // The number of entities to account for
             int size = 0;
 
@@ -98,24 +102,23 @@ namespace Saket.ECS
                 if(Match(archetypes[i].ComponentTypes, query))
                 {
                     size += archetypes[i].Count;
-                    archetypeIds.Add(i);
+                    _archetypes.Add(i);
                 }
             }
 
-            List<EntityPointer> r = new List<EntityPointer>(size);
+            _entities = new List<int>(size);
+
             // iterate over all entities matching their archetype 
+            // 
             // TODO this is slow
             for (int i = 0; i < entities.Count; i++)
             {
-                if (archetypeIds.Contains(entities[i].index_archetype))
-                    r.Add(entities[i]);
+                if (_archetypes.Contains(entities[i].index_archetype) )
+                    if(!archetypes[entities[i].index_archetype].avaliableRows.Contains(entities[i].index_row)) // Do not include deleted entities.
+                        _entities.Add(i);
             }
-
-            return r;
         }
 
-
-        
         /// <summary>
         /// 
         /// </summary>

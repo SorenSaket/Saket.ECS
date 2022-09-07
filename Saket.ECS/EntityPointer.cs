@@ -1,11 +1,14 @@
-﻿namespace Saket.ECS
+﻿using System;
+
+namespace Saket.ECS
 {
     /// <summary>
     /// 
     /// </summary>
     public struct EntityPointer 
     {
-        public int ID;
+        // This should never change after construction
+        public readonly int ID;
         /// <summary>
         /// Current version
         /// </summary>

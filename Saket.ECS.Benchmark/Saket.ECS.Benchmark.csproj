@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Saket.ECS\Saket.ECS.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Benchmarks\Initialization\" />
+  </ItemGroup>
+
 </Project>

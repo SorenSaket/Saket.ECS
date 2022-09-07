@@ -13,7 +13,7 @@ namespace Saket.ECS
         private QueryResult query;
         private int start;
         private int end;
-        int position = -1;
+        int position;
 
         public QueryEnumerator(QueryResult query, int start, int end)
         {

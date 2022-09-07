@@ -25,7 +25,7 @@ namespace Saket.ECS.Storage
     public  interface IComponentStorage
     {
         /// <summary> The number of components stored </summary>
-        public int Count { get; }
+        public int Capacity { get; }
 
         /// <summary> The Type of the stored object </summary>
         public Type ComponentType { get; }
@@ -35,9 +35,9 @@ namespace Saket.ECS.Storage
         public void Set<T>(in int index, in T value) where T : unmanaged;
 
 
-        public void CopyTo(int index, IntPtr destination);
-        public void Set(int index, IntPtr value);
-        public IntPtr Get(int index);
+        public void CopyTo(in int index, in IntPtr destination);
+        public void Set(in int index,in IntPtr value);
+        public IntPtr Get(in int index);
     }
 
 }

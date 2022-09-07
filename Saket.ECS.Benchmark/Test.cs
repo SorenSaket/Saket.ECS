@@ -63,7 +63,7 @@ namespace Saket.ECS
 
         public void Start()
         {
-            // Entities must both have position and velocity component
+            // Create a query that requires both position and velocity component
             query = new Query().With<(Position, Velocity)>();
 
             // Create new world
@@ -71,11 +71,14 @@ namespace Saket.ECS
 
             // Create stage
             var stage = new Stage();
+            // Add the system to the stage
             stage.Add(SystemMove);
 
             // Create pipeline
             var pipeline = new Pipeline();
             pipeline.AddStage(stage);
+
+
             world.SetPipeline(pipeline);
 
             // Create position velocity bundle
@@ -86,7 +89,6 @@ namespace Saket.ECS
             // Add component bundle to entity
             entity.Add(new Position());
             entity.Add(new Velocity(1,1));
-
         }
 
         public void Update(float delta)
@@ -95,6 +97,20 @@ namespace Saket.ECS
         }
 
         void SystemMove(World world)
+        {
+            var result = world.Query(query);
+            foreach (var entity in result)
+            {
+                // Move the entity forward
+                var position = entity.Get<Position>();
+                var velocity = entity.Get<Velocity>();
+
+                entity.Set<Position>(position.Value + (velocity.Value * world.Delta));
+                Console.WriteLine(entity.Get<Position>());
+            }
+        }
+
+        void SystemMoveParallel(World world)
         {
             var result = world.Query(query);
             foreach (var entity in result)

@@ -22,44 +22,17 @@ namespace Saket.ECS
         }
 
 
-        public void Add(Bundle bundle)
-        {
-            if(EntityPointer.index_archetype == -1)
-            {
-
-            }
-            else
-            {
-                // Move
-
-            }
-        }
-        public void Remove(Bundle bundle)
-        {
-            if (EntityPointer.index_archetype == -1)
-            {
-
-            }
-            else
-            {
-                // Move
-
-            }
-        }
         
         /// <summary>
         /// Adds component to entity
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void Add<T>(T value)
+        public Entity Add<T>(T value)
              where T : unmanaged
         {
-            
-
-
-
-            List<Type> newComponents = new List<Type>() { typeof(T) };
+            List<Type> newComponents = new List<Type>();
             Archetype currentArchetype = null;
+            // If the archtype is not unassigned
             if (EntityPointer.index_archetype != -1)
             {
                 currentArchetype = World.archetypes[EntityPointer.index_archetype];
@@ -73,21 +46,21 @@ namespace Saket.ECS
 
                 // Get or create new archetype
                 newComponents.AddRange(currentArchetype.ComponentTypes);
-
-                
             }
+            // Add new Component to the back
+            newComponents.Add(typeof(T));
 
             // Get archetype
             Archetype newArchetype = World.CreateOrGetArchetype(newComponents.ToArray(), out int newArchetypeIndex);
             int entityIndex = newArchetype.AddEntity();
-      
-            if(currentArchetype != null)
+
+            // Copy old values to new archetype
+            if (currentArchetype != null)
             {
-                // Copy old values to new archetype
                 // This can be done since the order of the components are the same
                 for (int i = 0; i < currentArchetype.ComponentTypes.Length; i++)
                 {
-                    IntPtr source = currentArchetype.Get(i, entityIndex);
+                    IntPtr source = currentArchetype.Get(i, EntityPointer.index_row);
                     newArchetype.Set(i, entityIndex, source);
                 }
 
@@ -99,15 +72,12 @@ namespace Saket.ECS
             newArchetype.Set(entityIndex, value);
 
             // change the entity pointer
-            // TODO ALSO CHANGE IN THE WORLD
 
             EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
+            // ALSO CHANGE IN THE WORLD
             World.entities[EntityPointer.ID] = EntityPointer;
+            return this;
         }
-       
-
-
-
 
         /// <summary>
         /// Removes component from entity
@@ -116,10 +86,18 @@ namespace Saket.ECS
         public void Remove<T>()
              where T : unmanaged
         {
-
+            throw new NotImplementedException();
         }
 
 
+        public void Add(Bundle bundle)
+        {
+            throw new NotImplementedException();
+        }
+        public void Remove(Bundle bundle)
+        {
+            throw new NotImplementedException();
+        }
 
 
         public T Get<T>()

@@ -6,33 +6,32 @@ using System.Threading.Tasks;
 using System.Reflection;
 namespace Saket.ECS
 {
-    // Pipline
-    // The purpose of the pipeline is to describe the system behaviour of a world
-    // Order of stage execution
-    // 
-
-   
-
+    /// <summary>
+    /// Grouping of behavior
+    /// The purpose of the pipeline is to describe the system behaviour of a world
+    /// Order of stage execution
+    /// </summary>
     public class Pipeline
     {
-        public List<Stage> stages;
+        public List<IStage> Stages { get; set; }
 
         public Pipeline()
         {
-            stages = new List<Stage>();
+            Stages = new List<IStage>();
         }
 
-        internal void Update(World world)
+        public void Update(World world, float delta)
         {
-            for (int i = 0; i < stages.Count; i++)
+            world.Delta = delta;
+            for (int i = 0; i < Stages.Count; i++)
             {
-                stages[i].Update(world);
+                Stages[i].Update(world);
             }
         }
 
-        public void AddStage(Stage stage)
+        public void AddStage(IStage stage)
         {
-            stages.Add(stage);
+            Stages.Add(stage);
         }
     }
 }

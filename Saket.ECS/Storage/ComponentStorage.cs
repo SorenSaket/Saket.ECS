@@ -15,21 +15,21 @@ namespace Saket.ECS.Storage
     /// <summary>
     /// Default storage type for storing components
     /// Uses an exponentional chunking strategy to resize
+    /// TODO: Change resizing strategy. from chunking to reallocating memory.
     /// </summary>
     public unsafe class ComponentStorage : IComponentStorage, IDisposable
     {
         public Type ComponentType { get; private set; }
-        
-        public int Count { get; private set; } = 0;
         public int Capacity { get; private set; } = 0;
 
-        private readonly int itemSizeInBytes;
-        private readonly int numberOfItemsInChunk;
-        private const int chunkSizeInBytes = 16 * 1024;
+        internal readonly int itemSizeInBytes;
+        internal readonly int numberOfItemsInChunk;
+        internal const int chunkSizeInBytes = 16 * 1024;
 
-        private bool disposedValue;
+        internal bool disposedValue;
 
         List<IntPtr> chunks;
+
 
         #region Construction
 
@@ -46,7 +46,6 @@ namespace Saket.ECS.Storage
 
 
         #endregion
-
         #region Destruction
         protected virtual void Dispose(bool disposing)
         {
@@ -113,7 +112,8 @@ namespace Saket.ECS.Storage
 #if DEBUG
             if (!typeof(T).Equals(ComponentType))
                 throw new ArgumentException("Object is not the same type as storage");
-#endif
+#endif 
+            EnsureSize(index);
             GetIndexes(index, out int index_chunk, out int index_element);
 #if DEBUG
             if (index_chunk >= chunks.Count || index_element >= numberOfItemsInChunk)
@@ -124,7 +124,7 @@ namespace Saket.ECS.Storage
         }
         #endregion
 
-        public void CopyTo(int index, IntPtr destination)
+        public void CopyTo(in int index,in IntPtr destination)
         {
             GetIndexes(index, out int index_chunk, out int index_element);
             Buffer.MemoryCopy( (void*)((byte*)chunks[index_chunk].ToPointer() + itemSizeInBytes * index_element), destination.ToPointer(), itemSizeInBytes, itemSizeInBytes);
@@ -135,7 +135,7 @@ namespace Saket.ECS.Storage
         //[DllImport("msvcrt.dll", SetLastError = false)]
        // static extern IntPtr memcpy(IntPtr dest, IntPtr src, int count);
 
-        public void Set(int index, IntPtr item)
+        public void Set(in int index,in IntPtr item)
         {
             EnsureSize(index);
             GetIndexes(index, out int index_chunk, out int index_element);
@@ -143,10 +143,10 @@ namespace Saket.ECS.Storage
             // memcpy(chunks[index_chunk] + itemSizeInBytes * index_element, item, itemSizeInBytes);
             //Marshal.Copy(item, 0, chunks[index_chunk]+itemSizeInBytes*index_element, itemSizeInBytes);
         }
-        public IntPtr Get(int index)
+        public IntPtr Get(in int index)
         {
+            EnsureSize(index);
             GetIndexes(index, out int index_chunk, out int index_element);
-
 #if DEBUG
             if (index_chunk >= chunks.Count || index_element >= numberOfItemsInChunk)
                 throw new ArgumentOutOfRangeException("Index out of range");

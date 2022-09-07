@@ -52,14 +52,13 @@ namespace Saket.ECS
         }
         public Query With<T1>()
         {
-            Inclusive.UnionWith(GetComponentsGenerics(typeof(T1)));
+            Inclusive.UnionWith(GetComponentsFromType(typeof(T1)));
             dirty = true;
-
             return this;
         }
         public Query Without<T1>()
         {
-            Exclusive.UnionWith(GetComponentsGenerics(typeof(T1)));
+            Exclusive.UnionWith(GetComponentsFromType(typeof(T1)));
             dirty = true;
             return this;
         }
@@ -74,23 +73,36 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        private static HashSet<Type> GetComponentsGenerics(Type type)
+        private static HashSet<Type> GetComponentsFromType(Type type)
         {
-            HashSet<Type> types = new HashSet<Type>();
-            Type[] generics = type.GetGenericArguments();
-
-            for (int i = 0; i < generics.Length; i++)
+            if(type.IsAssignableTo(typeof(Tuple)))
             {
-                if (generics[i].IsAssignableFrom(typeof(Tuple)))
+                HashSet<Type> types = new HashSet<Type>();
+                Type[] generics = type.GetGenericArguments();
+
+                for (int i = 0; i < generics.Length; i++)
                 {
-                    types.UnionWith(GetComponentsGenerics(generics[i]));
+                    if (generics[i].IsAssignableTo(typeof(Tuple)))
+                    {
+                        types.UnionWith(GetComponentsFromType(generics[i]));
+                    }
+                    else if(type.IsValueType)
+                    {
+                        types.Add(generics[i]);
+                    }
+                    else
+                    {
+                        throw new Exception("Invalid Component");
+                    }
                 }
-                else
-                {
-                    types.Add(generics[i]);
-                }
+                return types;
             }
-            return types;
+            else if (type.IsValueType)
+            {
+                return new HashSet<Type>() { type };
+            }
+
+            return new HashSet<Type>();
         }
 
         private int GetSignature()
@@ -106,5 +118,6 @@ namespace Saket.ECS
             }
             return code;
         }
+
     }
 }

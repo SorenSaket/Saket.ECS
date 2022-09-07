@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,75 +13,7 @@ namespace Saket.ECS.Tests.Storage
     [TestClass]
     public class Test_IComponentStorage
     {
-        struct Complex : IComponent
-        {
-            public float value;
-            public bool cool;
-
-            public Complex(float value, bool cool)
-            {
-                this.value = value;
-                this.cool = cool;
-            }
-
-            public override bool Equals(object? obj)
-            {
-                return obj is Complex complex &&
-                       value == complex.value &&
-                       cool == complex.cool;
-            }
-        }
-
-        [StructLayout(LayoutKind.Explicit, Size = 6, CharSet = CharSet.Ansi)]
-        struct ExplicitComplex : IComponent
-        {
-            [FieldOffset(0)]
-            public bool cool;
-            [FieldOffset(1)]
-            public float value;
-            [FieldOffset(5)]
-            public flags flags;
-
-            public ExplicitComplex(float value, bool cool, flags flags)
-            {
-                this.value = value;
-                this.cool = cool;
-                this.flags = flags;
-            }
-
-            public override bool Equals(object? obj)
-            {
-                return obj is ExplicitComplex complex &&
-                       value == complex.value &&
-                       cool == complex.cool &&
-                       flags == complex.flags;
-            }
-        }
-
-        [StructLayout(LayoutKind.Explicit, Size = 5, CharSet = CharSet.Ansi)]
-        struct UnionComplex : IComponent
-        {
-            [FieldOffset(0)]
-            public bool cool;
-            [FieldOffset(1)]
-            public int coolValue;
-            [FieldOffset(1)]
-            public float UncoolValue;
-
-        }
-
-
-        [Flags]
-        enum flags : byte
-        {
-            none = 0,
-            first = 1,
-            second = 2,
-            third = 4,
-            fourth = 8,
-        }
-
-
+        // TODO may solid tests
 
         [TestMethod]
         public void Test_Storage_Basic()
@@ -91,11 +24,11 @@ namespace Saket.ECS.Tests.Storage
 
             for (int i = 0; i < 10; i++)
             {
-                int index = random.Next(999999);
-                Complex input = new Complex(1.912492f, true);
+                int index = random.Next(9999);
+                Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
                 storetest(store, index, input);
-
             }
+
         }
 
         [TestMethod]
@@ -136,6 +69,93 @@ namespace Saket.ECS.Tests.Storage
             }
 
         }
+
+
+        [TestMethod]
+        public void Test_Storage_Fill()
+        {
+            ComponentStorage store = new ComponentStorage(typeof(Complex));
+
+            Random random = new Random();
+            float fill = (float)random.NextDouble();
+            Complex input = new Complex(fill, fill, true);
+            for (int i = 0; i < store.numberOfItemsInChunk; i++)
+            {
+                store.Set(i, input);
+            }
+
+            for (int i = 0; i < store.numberOfItemsInChunk; i++)
+            {
+                var output = store.Get<Complex>(i);
+                Assert.AreEqual(input, output);
+            }
+        }
+
+        [TestMethod]
+        public unsafe void Test_Storage_Copy()
+        {
+            ComponentStorage store = new ComponentStorage(typeof(Complex));
+
+            // Random fill value
+            Random random = new Random();
+
+            // Input value
+            Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
+            
+            // Set the storage
+            store.Set<Complex>(0, input);
+
+            // Stack Allocate 
+            Complex* destination = stackalloc Complex[1];
+            
+            // Perform Copy 
+            store.CopyTo(0, new IntPtr(destination));
+
+            // Size of the copied data
+            int size = Marshal.SizeOf<Complex>();
+
+            for (int y = 0; y < size; y++)
+            {
+                byte actual = ((byte*)&input)[y];
+                byte expected = ((byte*)destination)[y];
+
+                Assert.AreEqual(actual, expected);
+            }
+        }
+
+        [TestMethod]
+        public unsafe void Test_Storage_Copy_GetSet()
+        {
+            ComponentStorage from = new ComponentStorage(typeof(Complex));
+            ComponentStorage to = new ComponentStorage(typeof(Complex));
+
+            // Random fill value
+            Random random = new Random();
+
+            // Input value
+            Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
+
+
+            for (int y = 0; y < 10; y++)
+            {
+                from.Set(y, new IntPtr(&input));
+            }
+
+            for (int y = 0; y < 10; y++)
+            {
+                to.Set(y, from.Get(y));
+            }
+
+            for (int y = 0; y < 10; y++)
+            {
+                Assert.AreEqual(input, to.Get<Complex>(y));
+            }
+        }
+
+
+
+
+
 
         private void storetest<T>(IComponentStorage store, int index, T input)
             where T : unmanaged

@@ -7,18 +7,24 @@ using System.Threading.Tasks;
 
 namespace Saket.ECS
 {
+
+    // TODO. Make allocation free
+    //
     public class QueryResult : IEnumerable<Entity>
     {
-        internal List<EntityPointer> entities;
-        public int Count { get; private set; }
-        public int Start { get; private set; }
-        public int End { get; private set; }
+        public List<int> Entities;
+        public List<int> Archetypes;
+        public int Count;
+        public int Start;
+        public int End;
+
         private readonly World world;
 
-        internal QueryResult(World world, List<EntityPointer> entities)
+        internal QueryResult(World world, List<int> entities, List<int> archetypes)
         {
             this.world = world;
-            this.entities = entities;
+            this.Entities = entities;
+            this.Archetypes = archetypes;
             Start = 0;
             End = Count = entities.Count;
         }
@@ -27,7 +33,7 @@ namespace Saket.ECS
         {
             get
             {
-                return new Entity(world, entities[index]);
+                return new Entity(world, world.entities[Entities[index]]);
             }
         }
 
