@@ -34,7 +34,6 @@ namespace Saket.ECS.Storage
 
         public void Set<T>(in int index, in T value) where T : unmanaged;
 
-
         public void CopyTo(in int index, in IntPtr destination);
         public void Set(in int index,in IntPtr value);
         public IntPtr Get(in int index);

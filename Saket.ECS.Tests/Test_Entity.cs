@@ -53,7 +53,23 @@ namespace Saket.ECS.Tests
 
             Assert.AreEqual(inputPosition, actualPosition);
             Assert.AreEqual(inputVelocity, e.Get<Velocity>());
-
         }
+
+
+        [TestMethod]
+        public void Test_Entity_AddBundle()
+        {
+            var inputPosition = new Position(22, 3123);
+            var inputVelocity = new Velocity(455, 98756);
+
+            World world = new World();
+
+            var e = world.CreateEntity();
+            e.Add(new TestBundle(inputPosition, inputVelocity));
+
+            Assert.AreEqual(inputPosition, e.Get<Position>());
+            Assert.AreEqual(inputVelocity, e.Get<Velocity>());
+        }
+
     }
 }

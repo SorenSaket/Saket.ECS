@@ -39,8 +39,8 @@ namespace Saket.ECS.Tests
             Assert.AreEqual(1, world.archetypes[1].Count);
 
 
-            Assert.AreEqual(inputComplex, world.archetypes[1].storage[0].Get<Complex>(0));
-            Assert.AreEqual(inputVelocity, world.archetypes[1].storage[1].Get<Velocity>(0));
+            Assert.AreEqual(inputComplex, world.archetypes[1].storage[typeof(Complex)].Get<Complex>(0));
+            Assert.AreEqual(inputVelocity, world.archetypes[1].storage[typeof(Velocity)].Get<Velocity>(0));
         }
 
     }

@@ -56,11 +56,11 @@ namespace Saket.ECS.Tests
         [TestMethod]
         public void TypeArrayHashing()
         {
-            Type[] typesA = new Type[] { typeof(Velocity), typeof(Position) };
+            HashSet<Type> typesA = new (){ typeof(Velocity), typeof(Position) };
 
-            Type[] typesB = new Type[] { typeof(Position), typeof(Velocity) };
+            HashSet<Type> typesB = new (){ typeof(Position), typeof(Velocity) };
 
-            Type[] typesC = new Type[] { typeof(Velocity) };
+            HashSet<Type> typesC = new (){ typeof(Velocity) };
 
             Assert.AreEqual(Archetype.GetComponentGroupHashCode(typesA), Archetype.GetComponentGroupHashCode(typesB));
             Assert.AreNotEqual(Archetype.GetComponentGroupHashCode(typesC), Archetype.GetComponentGroupHashCode(typesB));

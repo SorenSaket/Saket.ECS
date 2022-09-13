@@ -17,7 +17,7 @@ namespace Saket.ECS.Tests
         /// </summary>
         [TestMethod]
         public void Test_Archetype_Creation()
-        {
+        {/*
             var testTypes = new Type[] { typeof(Position), typeof(Velocity) };
 
             var a = new Archetype(testTypes);
@@ -27,14 +27,14 @@ namespace Saket.ECS.Tests
             //
             Assert.AreEqual(a.storage.Length, 2);
 
-
+            */
 
         }
 
         [TestMethod]
         public void Test_Archetype_Entity_Add()
         {
-            var testTypes = new Type[] { typeof(Position), typeof(Velocity) };
+            HashSet<Type> testTypes = new() { typeof(Position), typeof(Velocity) };
 
             var a = new Archetype(testTypes);
 
@@ -53,7 +53,7 @@ namespace Saket.ECS.Tests
         [TestMethod]
         public void Test_Archetype_Entity_Remove()
         {
-            var testTypes = new Type[] { typeof(Position), typeof(Velocity) };
+            HashSet<Type> testTypes = new () { typeof(Position), typeof(Velocity) };
 
             var a = new Archetype(testTypes);
             int entity_row = a.AddEntity();
@@ -67,7 +67,7 @@ namespace Saket.ECS.Tests
         [TestMethod]
         public void Test_Archetype_Entity_Get()
         {
-            var testTypes = new Type[] { typeof(Position), typeof(Velocity) };
+            HashSet<Type> testTypes = new() { typeof(Position), typeof(Velocity) };
 
             var a = new Archetype(testTypes);
             int entity_row = a.AddEntity();

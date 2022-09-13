@@ -2,12 +2,33 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Saket.ECS.Tests
 {
+    internal class TestBundle : Bundle
+    {
+        public override Type[] Components => components;
+        public override object[] Data => data;
+
+
+        private readonly static Type[] components = new Type[] { typeof(Position), typeof(Velocity)};
+        private object[] data;
+
+        internal TestBundle(Position position, Velocity velocity)
+        {
+            data = new object[2]
+            {
+                position,
+                velocity
+            };
+        }
+    }
+
+
     struct Position
     {
         public float x;

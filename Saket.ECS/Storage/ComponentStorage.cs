@@ -107,6 +107,13 @@ namespace Saket.ECS.Storage
                 }
             }
         }
+        // MIght use these in future
+        // Marshal.PtrToStructure()
+        // Marshal.WriteByte
+        // Marshal.StructureToPtr
+        // Marshal.ReAllocHGlobal
+
+        // Marshal.PrelinkAll is interesting to avoid jit penalty runtime
         public T Get<T>(in int index) where T : unmanaged
         {
 #if DEBUG
@@ -120,6 +127,7 @@ namespace Saket.ECS.Storage
                 throw new ArgumentOutOfRangeException("Index out of range");
 #endif
             T* p = (T*)chunks[index_chunk].ToPointer();
+            
             return p[index_element];
         }
         #endregion
@@ -160,7 +168,6 @@ namespace Saket.ECS.Storage
 
         #endregion
 
-
         #region Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void GetIndexes(int index, out int index_chunk, out int index_element)
@@ -176,9 +183,6 @@ namespace Saket.ECS.Storage
                 chunks.Add(Marshal.AllocHGlobal(chunkSizeInBytes));
             }
         }
-
-        
-
         #endregion
 
     }

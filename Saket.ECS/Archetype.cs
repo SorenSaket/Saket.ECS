@@ -21,6 +21,7 @@ namespace Saket.ECS
 
         /// <summary> Current Number of Entities </summary>
         public int Count { get; private set; }
+        
         /// <summary>The maximum number of entities</summary>
         public int Capacity { get; private set; }
 
@@ -28,28 +29,28 @@ namespace Saket.ECS
         public Stack<int> avaliableRows = new Stack<int>();
 
         /// <summary> The components stored in archetype. Cannot be changed after construction</summary>
-        public Type[] ComponentTypes { get; }
-
+        public readonly HashSet<Type> ComponentTypes;
         /// <summary> Hashcode of component composition </summary>
         private readonly int componentHash = 0;
 
         /// <summary> Where the components are stored </summary>
-        internal IComponentStorage[] storage;
+        internal Dictionary<Type, IComponentStorage> storage;
 
         /// <summary>
         /// Create new Archetype store with desired Components
         /// </summary>
         /// <param name="components"></param>
-        public Archetype(Type[] components)
+        public Archetype(HashSet<Type> components)
         {
             ComponentTypes = components;
+            // Cache hashcode
             componentHash = GetComponentGroupHashCode(components);
-
-            storage = new IComponentStorage[components.Length];
-            for (int i = 0; i < components.Length; i++)
+            
+            // Initialize storage
+            storage = new Dictionary<Type, IComponentStorage>(components.Count);
+            foreach (var component in components)
             {
-                // TODO: Check for storage type and use accordingly
-                storage[i] = new ComponentStorage(components[i]);
+                storage[component] = new ComponentStorage(component);
             }
         }
 
@@ -96,80 +97,43 @@ namespace Saket.ECS
         {
             return ComponentTypes.Contains(typeof(T));
         }
+        public bool Has(Type type)
+        {
+            return ComponentTypes.Contains(type);
+        }
 
         internal T Get<T>(int index_element)
             where T : unmanaged
         {
-            int index_component = IndexOfComponent<T>();
-
-            if (index_component != -1)
-            {
-                return storage[index_component].Get<T>(index_element);
-            }
-            else
-            {
-                throw new Exception("Archetype does not contain component");
-            }
+            return storage[typeof(T)].Get<T>(index_element);
         }
-        internal T Get<T>(int index_component, int index_element) where T : unmanaged
+        internal IntPtr Get(Type type, int index_element)
         {
-            return storage[index_component].Get<T>(index_element);
-        }
-        internal IntPtr Get(int index_component, int index_element)
-        {
-            return storage[index_component].Get(index_element);
+            return storage[type].Get(index_element);
         }
 
         internal void Set<T>(int index_element, T value)
             where T : unmanaged
         {
-            int index_component = IndexOfComponent<T>();
-
-            if (index_component != -1)
-            {
-                storage[index_component].Set<T>(index_element, value);
-            }
-            else
-            {
-                throw new Exception("Archetype does not contain component");
-            }
+            storage[typeof(T)].Set<T>(index_element,value);
         }
-        internal void Set(int index_component, int index_element, IntPtr value)
+        internal void Set(Type type, int index_element, IntPtr value)
         {
-           storage[index_component].Set(index_element, value);
+           storage[type].Set(index_element, value);
         }
-        #endregion
+#endregion
 
-
-        #region Other
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int IndexOfComponent<T>()
+#region Other
+        public static int GetComponentGroupHashCode(HashSet<Type> components)
         {
-            for (int i = 0; i < ComponentTypes.Length; i++)
+            int hashCode = 31;
+            // 
+            foreach (var item in components)
             {
-                if (ComponentTypes[i] == typeof(T))
-                    return i;
+                hashCode ^= item.GetHashCode();
             }
 
-            return -1;
-        }
-
-
-        public static int GetComponentGroupHashCode(Type[] components)
-        {
-            // Sort to remove order variance
-            // TODO: is this needed?
-            var h = new Type[components.Length];
-            Array.Copy(components, h, components.Length);
-            Array.Sort(h, (x,y) => x.Name.CompareTo(y.Name));
-            // Remember that array is a refernce type so this will fuck up anything else in the callstack
-
-            var hash = new HashCode();
-            for (int i = 0; i < h.Length; i++)
-            {
-                hash.Add(h[i]);
-            }
-            return hash.ToHashCode();
+            return hashCode;
         }
 
         public override bool Equals(object? obj)
@@ -184,6 +148,6 @@ namespace Saket.ECS
         {
             return GetComponentGroupHashCode(ComponentTypes);
         }
-        #endregion
+#endregion
     }
 }

@@ -31,13 +31,14 @@ namespace Saket.ECS
         // 
         internal Dictionary<int, bool> queriesdirty;
 
-
+        internal Dictionary<Type, object> resources;
 
         public World()
         {
             const int initialSize = 1024;
             this.archetypes = new List<Archetype>();
             this.entities = new List<EntityPointer>(initialSize);
+            this.resources = new();
             queries = new();
             queriesdirty = new();
         }
@@ -50,6 +51,16 @@ namespace Saket.ECS
             var entity = new Entity(this, a);
             return entity;
         }
+
+        // Get already created entity
+        public Entity? GetEntity(int entityID)
+        {
+            if(entityID < 0)
+                return null;
+
+            return new Entity(this, entities[entityID]);
+        }
+
 
         /*
         public void DestroyEntity(int id_entity)
@@ -65,6 +76,25 @@ namespace Saket.ECS
             }
         }*/
 
+
+        public void SetResource<T>(T resource) //where T : notnull
+        {
+            if (resources.ContainsKey(typeof(T)))
+            {
+                resources[typeof(T)] = resource;
+                return;
+            }
+            resources.Add(typeof(T), resource);
+        }
+
+        public T? GetResource<T>()
+        {
+            if (resources.ContainsKey(typeof(T)))
+            {
+                return (T)resources[typeof(T)];
+            }
+            return default(T);
+        }
 
 
 
@@ -125,7 +155,7 @@ namespace Saket.ECS
         /// <param name="components"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        internal bool Match(Type[] components, Query filter)
+        internal bool Match(HashSet<Type> components, Query filter)
         {
             foreach (var item in filter.Inclusive)
             {
@@ -145,7 +175,7 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="types"></param>
         /// <returns></returns>
-        internal Archetype CreateOrGetArchetype(Type[] types, out int index)
+        internal Archetype CreateOrGetArchetype(HashSet<Type> types, out int index)
         {
             // Get hashcode for combination components
             int hash = Archetype.GetComponentGroupHashCode(types);
