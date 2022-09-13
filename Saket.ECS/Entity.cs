@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,46 +33,19 @@ namespace Saket.ECS
         public Entity Add<T>(T value)
              where T : unmanaged
         {
-            HashSet<Type> newComponents = new HashSet<Type>();
-            Archetype currentArchetype = null;
-            // If the archtype is not unassigned
-            if (EntityPointer.index_archetype != -1)
-            {
-                currentArchetype = World.archetypes[EntityPointer.index_archetype];
+			HashSet<Type> newComponents = GetExsistingComponentTypes();
+			if (newComponents.Contains(typeof(T)))
+			{
+				// TODO Consider not making exception
+				throw new InvalidOperationException("Entity already has this component");
+			}
+			newComponents.Add(typeof(T));
 
-                // Entity already has component
-                if (currentArchetype.Has<T>())
-                {
-                    // TODO Consider not making exception
-                    throw new InvalidOperationException("Entity already has component");
-                }
+			MoveToNewArchetype(newComponents, out var newArchetype);
 
-                // Get or create new archetype
-                newComponents.UnionWith(currentArchetype.ComponentTypes);
-            }
-            // Add new Component to the back
-            newComponents.Add(typeof(T));
-
-            // Get New archetype
-            Archetype newArchetype = World.CreateOrGetArchetype(newComponents, out int newArchetypeIndex);
-            int entityIndex = newArchetype.AddEntity();
-
-            // Copy old values to new archetype
-            if (currentArchetype != null)
-            {
-                CopyAllComponentsToArchetype(newArchetype, EntityPointer.index_row);
-                // Remove from old  
-                currentArchetype.RemoveEntity(EntityPointer.index_row);
-            }
-           
             // Set new value
-            newArchetype.Set(entityIndex, value);
+            newArchetype.Set(EntityPointer.index_row, value);
 
-            // change the entity pointer
-
-            EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
-            // ALSO CHANGE IN THE WORLD
-            World.entities[EntityPointer.ID] = EntityPointer;
             return this;
         }
 
@@ -81,73 +55,50 @@ namespace Saket.ECS
         /// <typeparam name="T"></typeparam>
         public Entity Remove<T>()
              where T : unmanaged
-        {
-            throw new NotImplementedException();
-        }
+		{
+			HashSet<Type> newComponents = GetExsistingComponentTypes();
+			if (!newComponents.Contains(typeof(T)))
+			{
+				// TODO Consider not making exception
+				throw new InvalidOperationException("Entity doesn't have this component");
+			}
+			// Remove Component
+			newComponents.Remove(typeof(T));
+			MoveToNewArchetype(newComponents, out _);
+			return this;
+		}
 
 
         public Entity Add(Bundle bundle)
         {
-            HashSet<Type> newComponents = new HashSet<Type>();
-            Archetype currentArchetype = null;
-
-            // If the archtype is not unassigned
-            if (EntityPointer.index_archetype != -1)
-            {
-                currentArchetype = World.archetypes[EntityPointer.index_archetype];
-                
-                for (int i = 0; i < bundle.Components.Length; i++)
-                {
-                    // Entity already has component
-                    if (currentArchetype.Has(bundle.Components[i]))
-                    {
-                        // TODO Consider not making exception
-                        throw new InvalidOperationException("Entity already has component");
-                    }
-                }
-
-                // Get or create new archetype
-                newComponents.UnionWith(currentArchetype.ComponentTypes);
-            }
-
-            // Add new Component to the back
+            HashSet<Type> newComponents = GetExsistingComponentTypes();
             newComponents.UnionWith(bundle.Components);
 
-            Archetype newArchetype = World.CreateOrGetArchetype(newComponents, out int newArchetypeIndex);
-            int entityIndex = newArchetype.AddEntity();
-
-            // Copy old values to new archetype
-            if (currentArchetype != null)
-            {
-                CopyAllComponentsToArchetype(newArchetype, EntityPointer.index_row);
-                // Remove from old  
-                currentArchetype.RemoveEntity(EntityPointer.index_row);
-            }
+			MoveToNewArchetype(newComponents, out var newArchetype);
 
             // set new values 
             for (int i = 0; i < bundle.Components.Length; i++)
             {
 				// See to learn more : https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.gchandle.tointptr?view=net-6.0
-				// Cannot handle bools 
+				// Cannot handle bools
 				// https://docs.microsoft.com/en-us/dotnet/framework/interop/blittable-and-non-blittable-types
 				var hdl = GCHandle.Alloc(bundle.Data[i],GCHandleType.Pinned);
-                newArchetype.Set(bundle.Components[i], entityIndex, hdl.AddrOfPinnedObject());
+                newArchetype.Set(bundle.Components[i], EntityPointer.index_row, hdl.AddrOfPinnedObject());
                 hdl.Free();
             }
-
-            EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
-            // ALSO CHANGE IN THE WORLD
-            World.entities[EntityPointer.ID] = EntityPointer;
             return this;
         }
-        public Entity Remove(Bundle bundle)
+        public Entity Remove(Type[] components)
         {
-            return this;
-        }
+			HashSet<Type> newComponents = GetExsistingComponentTypes();
+			newComponents.ExceptWith(components);
+			MoveToNewArchetype(newComponents, out var newArchetype);
+			return this;
+		}
 
 
 
-        internal void CopyAllComponentsToArchetype(Archetype target, int row)
+		internal void CopyAllComponentsToArchetype(Archetype target, int row)
         {
 #if DEBUG
             if(EntityPointer.index_archetype == -1)
@@ -166,8 +117,52 @@ namespace Saket.ECS
             }
         }
 
+		/// <summary>
+		/// Return a hashset of the exsisting components on the entity/archetype
+		/// </summary>
+		/// <returns></returns>
+		internal HashSet<Type> GetExsistingComponentTypes()
+		{
+			if (EntityPointer.index_archetype != -1)
+			{
+				Archetype currentArchetype = World.archetypes[EntityPointer.index_archetype];
 
+				return new HashSet<Type>(currentArchetype.ComponentTypes);
+			}
+			return new HashSet<Type>();
+		}
 
+		internal void MoveToNewArchetype(HashSet<Type> components, out Archetype newArchetype)
+		{
+			Archetype currentArchetype = null;
+			if (EntityPointer.index_archetype != -1)
+			{
+				currentArchetype = World.archetypes[EntityPointer.index_archetype];
+
+				if(currentArchetype.ComponentTypes.SetEquals(components))
+				{
+					newArchetype = currentArchetype;
+					return;
+				}
+			}
+
+			// Get New archetype
+			newArchetype = World.CreateOrGetArchetype(components, out int newArchetypeIndex);
+			int entityIndex = newArchetype.AddEntity();
+		
+			// Copy old values to new archetype
+			if (currentArchetype != null)
+			{
+				CopyAllComponentsToArchetype(newArchetype, EntityPointer.index_row);
+				// Remove from old  
+				currentArchetype.RemoveEntity(EntityPointer.index_row);
+			}
+		
+			// Update entity pointer
+			EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
+			// Update pointer in world
+			World.entities[EntityPointer.ID] = EntityPointer;
+		}
 
         public T Get<T>()
             where T : unmanaged
@@ -178,9 +173,9 @@ namespace Saket.ECS
         public T? TryGet<T>()
           where T : unmanaged
         {
-            // TODO Check if has component
-
-            return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
+			if(World.archetypes[EntityPointer.index_archetype].Has<T>())
+				return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
+			return null;
         }
 
         public void Set<T>(T value)

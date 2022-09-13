@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Saket.ECS
 {
@@ -9,5 +10,7 @@ namespace Saket.ECS
     {
         public abstract Type[] Components { get; }
         public abstract object[] Data { get; }
-    }
+
+		public static implicit operator Type[](Bundle b) => b.Components;
+	}
 }

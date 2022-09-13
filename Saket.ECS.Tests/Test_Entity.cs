@@ -33,7 +33,22 @@ namespace Saket.ECS.Tests
             Assert.IsTrue(Enumerable.SequenceEqual(world.archetypes[1].ComponentTypes, new Type[] { typeof(Position), typeof(Velocity) }));
         }
 
-        [TestMethod]
+		[TestMethod]
+		public void Test_Entity_RemoveComponent()
+		{
+			World world = new World();
+
+			var e = world.CreateEntity();
+			e.Add(new Position(22, 3123));
+			e.Add(new Velocity(22, 3123));
+			e.Remove<Velocity>();
+
+			Assert.AreEqual(1, world.archetypes[0].Count);
+			Assert.AreEqual(0, world.archetypes[1].Count);
+		}
+
+
+		[TestMethod]
         public void Test_Entity_Move()
         {
             var inputPosition = new Position(22, 3123);
