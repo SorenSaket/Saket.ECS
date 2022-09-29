@@ -66,6 +66,11 @@ namespace Saket.ECS
             }
             Capacity++;
             Count++;
+            foreach (var store in storage)
+            {
+                store.Value.EnsureSize(Capacity);
+            }
+
             return Count-1;
         }
         internal void RemoveEntity(int index_element)
@@ -107,17 +112,18 @@ namespace Saket.ECS
         {
             return storage[typeof(T)].Get<T>(index_element);
         }
-        internal IntPtr Get(Type type, int index_element)
-        {
-            return storage[type].Get(index_element);
-        }
-
         internal void Set<T>(int index_element, T value)
             where T : unmanaged
         {
-            storage[typeof(T)].Set<T>(index_element,value);
+            storage[typeof(T)].Set<T>(index_element, value);
         }
-        internal void Set(Type type, int index_element, IntPtr value)
+
+
+        internal unsafe void* Get(Type type, int index_element)
+        {
+            return storage[type].Get(index_element);
+        }
+        internal unsafe void Set(Type type, int index_element, void* value)
         {
            storage[type].Set(index_element, value);
         }

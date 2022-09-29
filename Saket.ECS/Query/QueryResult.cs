@@ -39,7 +39,7 @@ namespace Saket.ECS
 
         public IEnumerator<Entity> GetEnumerator()
         {
-            return new QueryEnumerator(this, 0, Count);
+            return new QueryEnumerator(this, Start, End);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -1,6 +1,10 @@
 Work in progress Archetype Entity Component System (ECS) in C#
 
-Targeting release of 0.1.0 where all basic features are implemented, working and tested.
+Current Features:
+
+- Full C# Archetype ECS system
+- Easily add multiple components to Entities with Bundles
+- Shared Resources (singleton components) per world.
 
 Usage Example:
 ```csharp
@@ -45,36 +49,37 @@ void System_Move(World world){
 
 
 
-Current Features:
-<ul>
-	<li>Full C# Archetype ECS system</li>
-	<li>Easily Add multiple components to Entity with Bundles</li>
-</ul>
+
+
+
+
+
+
+Targeting release of 0.1.0 where all basic features are implemented, working and tested.
 
 TODO for 0.1.0:
-<ul>
-	<li>Component Removal Functions</li>
-	<li>Query Caching</li>
-	<li>Entity World Transfer</li>
-	<li>Defer Spawn/Destroy Commands. Ensure in system command execution is possible to allow for lockless parallel execution.</li>
-	<li>Parallel System Execution</li>
-	<li>Resource System</li>
-</ul>
+- Query Caching
+	- Query Cache invalidation? dynamically modify queries as entities are created/modified
+- Convert storage to resizing model
+- Defer Spawn/Destroy Commands. Ensure in system command execution is possible to allow for lockless parallel execution.
+- Parallel System Execution
+
 
 TODO Future Releases:
-<ul>
-	<li>Full world Serialization and Cloning. Allows for instant saving and restoring full game state. Allows easy rollback netcode.</li>
-	<li>Ensure possiblity for garbage free loop execution path</li>
-	<li>True SOA Storage to allow SIMD</li>
-		To allow this queries should be able to match destoyed entities. This is to avoid sparse data in case of SIMD, but increases default use case complexity. To avoid unintended behavior implement Active Component.	
-	<li>Event System</li>
-	<li>Static parallel depency finder. Allows for easy view of shared resources</li>
-	<li>Api documentation</li>
-	<li>Extensive Testing</li>
-	<li>Benchmark. And speed comparison to other C# ECS systems</li>
-</ul>
+- Entity World Transfer
+- Remove Dependency of GCHandle to allow not blittable types like bool
+- Support for Query Any<> any groups
+- Full world Serialization and Cloning. Allows for instant saving and restoring full game state. Allows easy rollback netcode.
+- Ensure possiblity for garbage free loop execution path
+- True SOA Storage to allow SIMD
+	- To allow this queries should be able to match destoyed entities. This is to avoid sparse data in case of SIMD, but increases default use case complexity. To avoid unintended behavior implement Active Component.	
+- Event System
+- Api documentation
+- Extensive Testing
+- Benchmark. And speed comparison to other C# ECS systems
 
-Nice To have
-<ul>
-	<li>Built-in transform hierarchy</li>
-</ul>
+
+Nice To have:
+- Built-in transform hierarchy
+- Full Tuple Support. / Remove bundles?
+- Static parallel dependency finder. Allows for easy view of shared resources

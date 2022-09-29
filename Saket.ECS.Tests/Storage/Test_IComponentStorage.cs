@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Saket.ECS.Storage;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Saket.ECS.Tests.Storage
 {
@@ -19,7 +20,7 @@ namespace Saket.ECS.Tests.Storage
         public void Test_Storage_Basic()
         {
             ComponentStorage store = new ComponentStorage(typeof(Complex));
-
+            store.EnsureSize(10000);
             Random random = new Random();
 
             for (int i = 0; i < 10; i++)
@@ -35,7 +36,7 @@ namespace Saket.ECS.Tests.Storage
         public void Test_Storage_ExplicitLayout()
         {
             ComponentStorage store = new ComponentStorage(typeof(ExplicitComplex));
-
+            store.EnsureSize(10000);
             Random random = new Random();
             flags flags = 0;
             flags |= flags.first;
@@ -47,7 +48,7 @@ namespace Saket.ECS.Tests.Storage
 
             for (int i = 0; i < 10; i++)
             {
-                int index = random.Next(999999);
+                int index = random.Next(9999);
                
                 storetest(store, index, input);
             }
@@ -58,7 +59,7 @@ namespace Saket.ECS.Tests.Storage
         public void Test_Storage_Union()
         {
             ComponentStorage store = new ComponentStorage(typeof(UnionComplex));
-
+            store.EnsureSize(10000);
             Random random = new Random();
 
             UnionComplex input = new UnionComplex{cool = false, UncoolValue = float.MaxValue };
@@ -70,64 +71,13 @@ namespace Saket.ECS.Tests.Storage
 
         }
 
-
-        [TestMethod]
-        public void Test_Storage_Fill()
-        {
-            ComponentStorage store = new ComponentStorage(typeof(Complex));
-
-            Random random = new Random();
-            float fill = (float)random.NextDouble();
-            Complex input = new Complex(fill, fill, true);
-            for (int i = 0; i < store.numberOfItemsInChunk; i++)
-            {
-                store.Set(i, input);
-            }
-
-            for (int i = 0; i < store.numberOfItemsInChunk; i++)
-            {
-                var output = store.Get<Complex>(i);
-                Assert.AreEqual(input, output);
-            }
-        }
-
-        [TestMethod]
-        public unsafe void Test_Storage_Copy()
-        {
-            ComponentStorage store = new ComponentStorage(typeof(Complex));
-
-            // Random fill value
-            Random random = new Random();
-
-            // Input value
-            Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
-            
-            // Set the storage
-            store.Set<Complex>(0, input);
-
-            // Stack Allocate 
-            Complex* destination = stackalloc Complex[1];
-            
-            // Perform Copy 
-            store.CopyTo(0, new IntPtr(destination));
-
-            // Size of the copied data
-            int size = Marshal.SizeOf<Complex>();
-
-            for (int y = 0; y < size; y++)
-            {
-                byte actual = ((byte*)&input)[y];
-                byte expected = ((byte*)destination)[y];
-
-                Assert.AreEqual(actual, expected);
-            }
-        }
-
         [TestMethod]
         public unsafe void Test_Storage_Copy_GetSet()
         {
             ComponentStorage from = new ComponentStorage(typeof(Complex));
             ComponentStorage to = new ComponentStorage(typeof(Complex));
+            from.EnsureSize(10);
+            to.EnsureSize(10);
 
             // Random fill value
             Random random = new Random();
@@ -138,7 +88,7 @@ namespace Saket.ECS.Tests.Storage
 
             for (int y = 0; y < 10; y++)
             {
-                from.Set(y, new IntPtr(&input));
+                from.Set(y, input);
             }
 
             for (int y = 0; y < 10; y++)

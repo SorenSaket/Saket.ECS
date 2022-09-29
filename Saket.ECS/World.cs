@@ -18,11 +18,11 @@ namespace Saket.ECS
         //
         public List<Archetype> archetypes;
 
-        /// <summary> All the entities currently in the world. When entity is removed they still exists in this  </summary>
+        /// <summary> All the entities currently in the world. When entity is removed they still exists in this data structure </summary>
         public List<EntityPointer> entities;
 
         // Maintain query when objects are added/removed
-        // Queries maintain their valitidy troughout a single update since all modifcation (create/destroy, add/remove component) to entities are defered to end of update
+        // Queries maintain their validity troughout a single update since all modifcation (create/destroy, add/remove component) to entities are defered to end of update
         // 
         // the int indexes into entities list
         internal Dictionary<int, QueryResult> queries;
@@ -33,11 +33,14 @@ namespace Saket.ECS
 
         internal Dictionary<Type, object> resources;
 
+        internal Stack<int> destroyedEntities;
+
         public World()
         {
             const int initialSize = 1024;
             this.archetypes = new List<Archetype>();
             this.entities = new List<EntityPointer>(initialSize);
+            this.destroyedEntities = new();
             this.resources = new();
             queries = new();
             queriesdirty = new();
@@ -46,35 +49,41 @@ namespace Saket.ECS
         public Entity CreateEntity()
         {
             // Search for
-            var a = new EntityPointer(entities.Count, 0,-1,-1);
-            entities.Add(a);
-            var entity = new Entity(this, a);
-            return entity;
+            if(destroyedEntities.Count > 0)
+            {
+                return new Entity(this, entities[destroyedEntities.Pop()]);
+            }
+            else
+            {
+                var a = new EntityPointer(entities.Count, 0, -1, -1);
+                entities.Add(a);
+                return new Entity(this, a);
+            }
         }
 
         // Get already created entity
         public Entity? GetEntity(int entityID)
         {
-            if(entityID < 0)
+            if(entityID < 0 || entityID >= entities.Count)
                 return null;
-
+            if (destroyedEntities.Contains(entityID))
+                return null;
             return new Entity(this, entities[entityID]);
         }
 
-
-        /*
-        public void DestroyEntity(int id_entity)
+        public void DestroyEntity(int entityID)
         {
-            // Check if entitypointer is valid
-            if(activeEntities[id_entity] == true)
+            if (!destroyedEntities.Contains(entityID))
             {
-                activeEntities[id_entity] = false;
+                destroyedEntities.Push(entityID);
+                var old = entities[entityID];
+                // Remove from archetype
+                if (old.index_archetype != -1 && old.index_row != -1)
+                    archetypes[old.index_archetype].RemoveEntity(old.index_row);
+                // Reset the pointer and advance version counter
+                entities[entityID] = new EntityPointer(entityID, old.version+1);
             }
-            else
-            {
-                throw new Exception("Entity is already destroyed");
-            }
-        }*/
+        }
 
 
         public void SetResource<T>(T resource) //where T : notnull
@@ -97,7 +106,6 @@ namespace Saket.ECS
         }
 
 
-
         public QueryResult Query(Query query)
         {/*
             if (!queries.ContainsKey(query.Signature))
@@ -117,6 +125,8 @@ namespace Saket.ECS
 
             return new QueryResult(this, _entities, _archetypes);
         }
+
+
         // Todo make allocation free
         internal void GetMatchingEntities(Query query, out List<int> _entities, out List<int> _archetypes) 
         { 

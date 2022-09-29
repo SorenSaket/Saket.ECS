@@ -26,6 +26,7 @@ namespace Saket.ECS
             for (int i = 0; i < Stages.Count; i++)
             {
                 Stages[i].Update(world);
+                // TODO insert query updates
             }
         }
 

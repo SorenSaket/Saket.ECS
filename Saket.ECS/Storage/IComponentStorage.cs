@@ -30,13 +30,32 @@ namespace Saket.ECS.Storage
         /// <summary> The Type of the stored object </summary>
         public Type ComponentType { get; }
 
+
+        // Safe
+
         public T Get<T>(in int index) where T : unmanaged;
 
         public void Set<T>(in int index, in T value) where T : unmanaged;
 
-        public void CopyTo(in int index, in IntPtr destination);
-        public void Set(in int index,in IntPtr value);
-        public IntPtr Get(in int index);
+
+        // Unsafe 
+
+        /// <summary>
+        /// Copy value from pointer to element
+        /// </summary>
+        /// <param name="index">Index of the element to copy to</param>
+        /// <param name="value">Pointer to the item to be copied</param>
+        public unsafe void Set(in int index, in void* value);
+        
+        /// <summary>
+        /// Gets a pointer to specific element
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>A pointer to element at that index</returns>
+        public unsafe void* Get(in int index);
+
+
+        public void EnsureSize(in int requiredCapacity);
     }
 
 }

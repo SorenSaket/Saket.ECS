@@ -14,6 +14,7 @@ namespace Saket.ECS
     /// </summary>
     public struct Entity
     {
+        public bool Destroyed => ID == -1;
         public int ID => EntityPointer.ID;
         public EntityPointer EntityPointer { get; private set; }
         public readonly World World { get; }
@@ -24,6 +25,11 @@ namespace Saket.ECS
             this.EntityPointer = pointer;
         }
 
+        public void Destroy()
+        {
+            World.DestroyEntity(ID);
+            EntityPointer = new EntityPointer(-1);
+        }
 
         
         /// <summary>
@@ -82,8 +88,11 @@ namespace Saket.ECS
 				// See to learn more : https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.gchandle.tointptr?view=net-6.0
 				// Cannot handle bools
 				// https://docs.microsoft.com/en-us/dotnet/framework/interop/blittable-and-non-blittable-types
-				var hdl = GCHandle.Alloc(bundle.Data[i],GCHandleType.Pinned);
-                newArchetype.Set(bundle.Components[i], EntityPointer.index_row, hdl.AddrOfPinnedObject());
+				var hdl = GCHandle.Alloc(bundle.Data[i], GCHandleType.Pinned);
+                unsafe
+                {
+                    newArchetype.Set(bundle.Components[i], EntityPointer.index_row, hdl.AddrOfPinnedObject().ToPointer());
+                }
                 hdl.Free();
             }
             return this;
@@ -98,7 +107,7 @@ namespace Saket.ECS
 
 
 
-		internal void CopyAllComponentsToArchetype(Archetype target, int row)
+		internal unsafe void CopyAllComponentsToArchetype(Archetype target, int row)
         {
 #if DEBUG
             if(EntityPointer.index_archetype == -1)
@@ -112,7 +121,7 @@ namespace Saket.ECS
             {
                 if (target.storage.TryGetValue(storage_from.Value.ComponentType, out var storage_to))
                 {
-                    storage_from.Value.CopyTo(row, storage_to.Get(row));
+                    storage_to.Set(row, storage_from.Value.Get(row));
                 }
             }
         }
@@ -177,6 +186,15 @@ namespace Saket.ECS
 				return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
 			return null;
         }
+        public bool Has<T>()
+          where T : unmanaged
+        {
+            return World.archetypes[EntityPointer.index_archetype].Has<T>();
+        }
+        public bool Has(Type type)
+        {
+            return World.archetypes[EntityPointer.index_archetype].Has(type);
+        }
 
         public void Set<T>(T value)
              where T : unmanaged
@@ -184,5 +202,4 @@ namespace Saket.ECS
             World.archetypes[EntityPointer.index_archetype].Set<T>(EntityPointer.index_row, value);
         }
     }
-
 }

@@ -23,6 +23,7 @@ namespace Saket.ECS
         {
             get
             {
+                // Lazy recomputing of signature
                 if (dirty)
                 {
                     signature = GetSignature();
@@ -35,9 +36,6 @@ namespace Saket.ECS
         private int signature;
         private bool dirty;
 
-
-        
-
         public Query()
         {
             Inclusive = new HashSet<Type>();
@@ -48,7 +46,6 @@ namespace Saket.ECS
         public Query Any<T1>()
         {
             throw new NotImplementedException();
-            return this;
         }
         public Query With<T1>()
         {
@@ -75,24 +72,21 @@ namespace Saket.ECS
         /// <returns></returns>
         private static HashSet<Type> GetComponentsFromType(Type type)
         {
-            if(type.IsAssignableTo(typeof(Tuple)))
+            // If the type is a tuple
+            if(typeof(ITuple).IsAssignableFrom(type))
             {
                 HashSet<Type> types = new HashSet<Type>();
                 Type[] generics = type.GetGenericArguments();
 
                 for (int i = 0; i < generics.Length; i++)
                 {
-                    if (generics[i].IsAssignableTo(typeof(Tuple)))
+                    if (typeof(ITuple).IsAssignableFrom(type))
                     {
                         types.UnionWith(GetComponentsFromType(generics[i]));
                     }
                     else if(type.IsValueType)
                     {
                         types.Add(generics[i]);
-                    }
-                    else
-                    {
-                        throw new Exception("Invalid Component");
                     }
                 }
                 return types;
@@ -105,6 +99,8 @@ namespace Saket.ECS
             return new HashSet<Type>();
         }
 
+
+        // TODO. Validate collision occurence.
         private int GetSignature()
         {
             int code = 0;

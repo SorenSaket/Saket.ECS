@@ -8,64 +8,45 @@ using System.Threading.Tasks;
 
 namespace Saket.ECS.Storage
 {
-    public class ComponentStorageSettings
-    {
-
-    }
     /// <summary>
     /// Default storage type for storing components
-    /// Uses an exponentional chunking strategy to resize
-    /// TODO: Change resizing strategy. from chunking to reallocating memory.
     /// </summary>
     public unsafe class ComponentStorage : IComponentStorage, IDisposable
     {
-        public Type ComponentType { get; private set; }
+        public Type ComponentType { get; }
         public int Capacity { get; private set; } = 0;
 
         internal readonly int itemSizeInBytes;
-        internal readonly int numberOfItemsInChunk;
-        internal const int chunkSizeInBytes = 16 * 1024;
 
         internal bool disposedValue;
 
-        List<IntPtr> chunks;
-
+         byte* data;
 
         #region Construction
 
-        public ComponentStorage(Type component, ComponentStorageSettings? settings = default(ComponentStorageSettings))
+        public ComponentStorage(Type component)
         {
+#if DEBUG
+            if (!Utilities.IsValidComponent(component))
+                throw new Exception("Invalid Component");
+#endif
             this.ComponentType = component;
-
             this.itemSizeInBytes = Marshal.SizeOf(component);
-            this.numberOfItemsInChunk = (chunkSizeInBytes / itemSizeInBytes);
-
-            this.chunks = new List<IntPtr>();
+            
+            // Initial Allocation
+            data = (byte*)Marshal.AllocHGlobal(8 * itemSizeInBytes).ToPointer();
+            Capacity = 8;
         }
 
-
-
         #endregion
+
         #region Destruction
+        // https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
-
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                for (int i = 0; i < chunks.Count; i++)
-                {
-                    Marshal.FreeHGlobal(chunks[i]);
-                }
-
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                }
-                // TODO: set large fields to null
-
-
+                Marshal.FreeHGlobal(new IntPtr(data));
                 disposedValue = true;
             }
         }
@@ -91,19 +72,17 @@ namespace Saket.ECS.Storage
 #if DEBUG
             if (!typeof(T).Equals(ComponentType))
                 throw new ArgumentException("Object is not the same type as storage");
+            if (index >= Capacity || index < 0)
+                throw new ArgumentOutOfRangeException("Index out of range");
 #endif
-            EnsureSize(index);
-            GetIndexes(index, out int index_chunk, out int index_element);
-            
-            fixed(T* ptr = &item)
+            fixed (T* ptr = &item)
             {
                 // Get pointer to item
                 byte* ptrItem = (byte*)ptr;
-                byte* ptrDestination = (byte*)chunks[index_chunk].ToPointer();
                 // Copy all bytes
                 for (int y = 0; y < itemSizeInBytes; y++)
                 {
-                    ptrDestination[index_element * itemSizeInBytes + y] = ptrItem[y];
+                    data[index * itemSizeInBytes + y] = ptrItem[y];
                 }
             }
         }
@@ -112,77 +91,74 @@ namespace Saket.ECS.Storage
         // Marshal.WriteByte
         // Marshal.StructureToPtr
         // Marshal.ReAllocHGlobal
-
         // Marshal.PrelinkAll is interesting to avoid jit penalty runtime
+
         public T Get<T>(in int index) where T : unmanaged
         {
 #if DEBUG
             if (!typeof(T).Equals(ComponentType))
                 throw new ArgumentException("Object is not the same type as storage");
-#endif 
-            EnsureSize(index);
-            GetIndexes(index, out int index_chunk, out int index_element);
-#if DEBUG
-            if (index_chunk >= chunks.Count || index_element >= numberOfItemsInChunk)
+            if (index >= Capacity || index < 0)
                 throw new ArgumentOutOfRangeException("Index out of range");
 #endif
-            T* p = (T*)chunks[index_chunk].ToPointer();
-            
-            return p[index_element];
+            return ((T*)data)[index];
         }
         #endregion
 
-        public void CopyTo(in int index,in IntPtr destination)
+
+
+        #region Pointer based IComponentStorage
+        
+        /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
+        public unsafe void Set(in int index, in void* item)
         {
-            GetIndexes(index, out int index_chunk, out int index_element);
-            Buffer.MemoryCopy( (void*)((byte*)chunks[index_chunk].ToPointer() + itemSizeInBytes * index_element), destination.ToPointer(), itemSizeInBytes, itemSizeInBytes);
-        }
-
-        #region object based IComponentStorage
-
-        //[DllImport("msvcrt.dll", SetLastError = false)]
-       // static extern IntPtr memcpy(IntPtr dest, IntPtr src, int count);
-
-        public void Set(in int index,in IntPtr item)
-        {
-            EnsureSize(index);
-            GetIndexes(index, out int index_chunk, out int index_element);
-            Buffer.MemoryCopy(item.ToPointer(), ((byte*)chunks[index_chunk].ToPointer() + itemSizeInBytes * index_element), itemSizeInBytes, itemSizeInBytes);
+#if DEBUG
+            if (index >= Capacity || index < 0)
+                throw new ArgumentOutOfRangeException("Index out of range");
+#endif
+            //
+            Buffer.MemoryCopy(
+                item, 
+                &data[itemSizeInBytes * index], 
+                itemSizeInBytes, 
+                itemSizeInBytes);
+            // Alternative apis
+            //[DllImport("msvcrt.dll", SetLastError = false)]
+            // static extern IntPtr memcpy(IntPtr dest, IntPtr src, int count);
             // memcpy(chunks[index_chunk] + itemSizeInBytes * index_element, item, itemSizeInBytes);
             //Marshal.Copy(item, 0, chunks[index_chunk]+itemSizeInBytes*index_element, itemSizeInBytes);
         }
-        public IntPtr Get(in int index)
+
+        /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
+        public unsafe void* Get(in int index)
         {
-            EnsureSize(index);
-            GetIndexes(index, out int index_chunk, out int index_element);
 #if DEBUG
-            if (index_chunk >= chunks.Count || index_element >= numberOfItemsInChunk)
-                throw new ArgumentOutOfRangeException("Index out of range");
+        if (index >= Capacity || index < 0)
+            throw new ArgumentOutOfRangeException("Index out of range");
 #endif
-
-            byte* ptr_chunk = (byte*)chunks[index_chunk].ToPointer();
-            byte* ptr_element = &ptr_chunk[index_element * itemSizeInBytes];
-
-            return new IntPtr((void*)ptr_element);
+            return &data[index * itemSizeInBytes];
         }
 
         #endregion
 
         #region Internal
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void GetIndexes(int index, out int index_chunk, out int index_element)
+        public void EnsureSize(in int requiredCapacity)
         {
-            index_chunk = index / numberOfItemsInChunk;
-            index_element = index % numberOfItemsInChunk;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EnsureSize(int requiredCapacity)
-        {
-            while (requiredCapacity >= numberOfItemsInChunk * chunks.Count)
+            int newCapacity = Capacity;
+            // Double the capacity until theres enough
+            while (requiredCapacity >= newCapacity)
             {
-                chunks.Add(Marshal.AllocHGlobal(chunkSizeInBytes));
+                newCapacity *= 2;
             }
+
+            // https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.reallochglobal?view=net-6.0
+            // "the original memory block has been freed"
+            data = (byte*)Marshal.ReAllocHGlobal(new IntPtr(data), new IntPtr(newCapacity*itemSizeInBytes)).ToPointer();
+            Capacity = newCapacity;
         }
+
         #endregion
 
     }
