@@ -22,7 +22,7 @@ namespace Saket.ECS.Storage
         }
     }
 
-    public  interface IComponentStorage
+    public interface IComponentStorage
     {
         /// <summary> The number of components stored </summary>
         public int Capacity { get; }
@@ -30,7 +30,7 @@ namespace Saket.ECS.Storage
         /// <summary> The Type of the stored object </summary>
         public Type ComponentType { get; }
 
-
+        public int ItemSizeInBytes { get; }
         // Safe
 
         public T Get<T>(in int index) where T : unmanaged;
@@ -55,7 +55,7 @@ namespace Saket.ECS.Storage
         public unsafe void* Get(in int index);
 
 
-        public void EnsureSize(in int requiredCapacity);
+        public void EnsureCapacity(in int requiredCapacity);
     }
 
 }

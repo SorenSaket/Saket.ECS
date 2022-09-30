@@ -1,5 +1,6 @@
 ﻿using Saket.ECS.Storage;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,7 +12,7 @@ namespace Saket.ECS
     /// <summary>
     /// 
     /// </summary>
-    public class Archetype : IEquatable<Archetype?>
+    public class Archetype : IEquatable<Archetype?> , IEnumerable<int>
     {
         // Hashcode, ID
         // ArchetypeIds are equal across application at runtime, but differ each run
@@ -25,6 +26,7 @@ namespace Saket.ECS
         /// <summary>The maximum number of entities</summary>
         public int Capacity { get; private set; }
 
+
         /// <summary> Used to recycle entity IDs </summary>
         public Stack<int> avaliableRows = new Stack<int>();
 
@@ -34,7 +36,7 @@ namespace Saket.ECS
         private readonly int componentHash = 0;
 
         /// <summary> Where the components are stored </summary>
-        internal Dictionary<Type, IComponentStorage> storage;
+        public Dictionary<Type, IComponentStorage> storage;
 
         /// <summary>
         /// Create new Archetype store with desired Components
@@ -68,7 +70,7 @@ namespace Saket.ECS
             Count++;
             foreach (var store in storage)
             {
-                store.Value.EnsureSize(Capacity);
+                store.Value.EnsureCapacity(Capacity);
             }
 
             return Count-1;
@@ -107,23 +109,23 @@ namespace Saket.ECS
             return ComponentTypes.Contains(type);
         }
 
-        internal T Get<T>(int index_element)
+        public T Get<T>(int index_element)
             where T : unmanaged
         {
             return storage[typeof(T)].Get<T>(index_element);
         }
-        internal void Set<T>(int index_element, T value)
+        public void Set<T>(int index_element, T value)
             where T : unmanaged
         {
             storage[typeof(T)].Set<T>(index_element, value);
         }
 
 
-        internal unsafe void* Get(Type type, int index_element)
+        public unsafe void* Get(Type type, int index_element)
         {
             return storage[type].Get(index_element);
         }
-        internal unsafe void Set(Type type, int index_element, void* value)
+        public unsafe void Set(Type type, int index_element, void* value)
         {
            storage[type].Set(index_element, value);
         }
@@ -154,6 +156,15 @@ namespace Saket.ECS
         {
             return GetComponentGroupHashCode(ComponentTypes);
         }
-#endregion
+
+        public IEnumerator<int> GetEnumerator()
+        {
+            return new ArchetypeEnumerator(this);
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+        #endregion
     }
 }

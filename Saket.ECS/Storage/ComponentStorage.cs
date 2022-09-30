@@ -16,11 +16,11 @@ namespace Saket.ECS.Storage
         public Type ComponentType { get; }
         public int Capacity { get; private set; } = 0;
 
-        internal readonly int itemSizeInBytes;
+        public readonly int ItemSizeInBytes;
 
         internal bool disposedValue;
 
-         byte* data;
+        byte* data;
 
         #region Construction
 
@@ -31,10 +31,10 @@ namespace Saket.ECS.Storage
                 throw new Exception("Invalid Component");
 #endif
             this.ComponentType = component;
-            this.itemSizeInBytes = Marshal.SizeOf(component);
+            this.ItemSizeInBytes = Marshal.SizeOf(component);
             
             // Initial Allocation
-            data = (byte*)Marshal.AllocHGlobal(8 * itemSizeInBytes).ToPointer();
+            data = (byte*)Marshal.AllocHGlobal(8 * ItemSizeInBytes).ToPointer();
             Capacity = 8;
         }
 
@@ -80,9 +80,9 @@ namespace Saket.ECS.Storage
                 // Get pointer to item
                 byte* ptrItem = (byte*)ptr;
                 // Copy all bytes
-                for (int y = 0; y < itemSizeInBytes; y++)
+                for (int y = 0; y < ItemSizeInBytes; y++)
                 {
-                    data[index * itemSizeInBytes + y] = ptrItem[y];
+                    data[index * ItemSizeInBytes + y] = ptrItem[y];
                 }
             }
         }
@@ -119,9 +119,9 @@ namespace Saket.ECS.Storage
             //
             Buffer.MemoryCopy(
                 item, 
-                &data[itemSizeInBytes * index], 
-                itemSizeInBytes, 
-                itemSizeInBytes);
+                &data[ItemSizeInBytes * index], 
+                ItemSizeInBytes, 
+                ItemSizeInBytes);
             // Alternative apis
             //[DllImport("msvcrt.dll", SetLastError = false)]
             // static extern IntPtr memcpy(IntPtr dest, IntPtr src, int count);
@@ -136,7 +136,7 @@ namespace Saket.ECS.Storage
         if (index >= Capacity || index < 0)
             throw new ArgumentOutOfRangeException("Index out of range");
 #endif
-            return &data[index * itemSizeInBytes];
+            return &data[index * ItemSizeInBytes];
         }
 
         #endregion
@@ -144,7 +144,7 @@ namespace Saket.ECS.Storage
         #region Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void EnsureSize(in int requiredCapacity)
+        public void EnsureCapacity(in int requiredCapacity)
         {
             int newCapacity = Capacity;
             // Double the capacity until theres enough
@@ -155,7 +155,7 @@ namespace Saket.ECS.Storage
 
             // https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.reallochglobal?view=net-6.0
             // "the original memory block has been freed"
-            data = (byte*)Marshal.ReAllocHGlobal(new IntPtr(data), new IntPtr(newCapacity*itemSizeInBytes)).ToPointer();
+            data = (byte*)Marshal.ReAllocHGlobal(new IntPtr(data), new IntPtr(newCapacity*ItemSizeInBytes)).ToPointer();
             Capacity = newCapacity;
         }
 
