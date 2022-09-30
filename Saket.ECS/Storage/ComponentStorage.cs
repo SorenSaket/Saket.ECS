@@ -16,7 +16,7 @@ namespace Saket.ECS.Storage
         public Type ComponentType { get; }
         public int Capacity { get; private set; } = 0;
 
-        public readonly int ItemSizeInBytes;
+        public int ItemSizeInBytes { get; }
 
         internal bool disposedValue;
 
