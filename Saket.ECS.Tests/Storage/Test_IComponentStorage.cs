@@ -20,7 +20,7 @@ namespace Saket.ECS.Tests.Storage
         public void Test_Storage_Basic()
         {
             ComponentStorage store = new ComponentStorage(typeof(Complex));
-            store.EnsureSize(10000);
+            store.EnsureCapacity(10000);
             Random random = new Random();
 
             for (int i = 0; i < 10; i++)
@@ -36,7 +36,7 @@ namespace Saket.ECS.Tests.Storage
         public void Test_Storage_ExplicitLayout()
         {
             ComponentStorage store = new ComponentStorage(typeof(ExplicitComplex));
-            store.EnsureSize(10000);
+            store.EnsureCapacity(10000);
             Random random = new Random();
             flags flags = 0;
             flags |= flags.first;
@@ -59,7 +59,7 @@ namespace Saket.ECS.Tests.Storage
         public void Test_Storage_Union()
         {
             ComponentStorage store = new ComponentStorage(typeof(UnionComplex));
-            store.EnsureSize(10000);
+            store.EnsureCapacity(10000);
             Random random = new Random();
 
             UnionComplex input = new UnionComplex{cool = false, UncoolValue = float.MaxValue };
@@ -76,8 +76,8 @@ namespace Saket.ECS.Tests.Storage
         {
             ComponentStorage from = new ComponentStorage(typeof(Complex));
             ComponentStorage to = new ComponentStorage(typeof(Complex));
-            from.EnsureSize(10);
-            to.EnsureSize(10);
+            from.EnsureCapacity(10);
+            to.EnsureCapacity(10);
 
             // Random fill value
             Random random = new Random();

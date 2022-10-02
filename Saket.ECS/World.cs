@@ -10,7 +10,7 @@ namespace Saket.ECS
     /// <summary>
     /// 
     /// </summary>
-    public class World
+    public class World :  IEnumerable<Entity>
     {
         /// <summary> Time delta in seconds </summary>
         public float Delta { get; set; }
@@ -165,7 +165,7 @@ namespace Saket.ECS
         /// <param name="components"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        internal bool Match(HashSet<Type> components, Query filter)
+        internal static bool Match(HashSet<Type> components, Query filter)
         {
             foreach (var item in filter.Inclusive)
             {
@@ -206,6 +206,51 @@ namespace Saket.ECS
             archetypes.Add(arc);
             index = archetypes.Count - 1;
             return arc;
+        }
+
+        /// <summary>
+        /// Clears all entity related data
+        /// Does not deallocate memory
+        /// </summary>
+        public void Clear()
+        {
+            destroyedEntities.Clear();
+            entities.Clear();
+
+            foreach (var archetype in archetypes)
+            {
+                archetype.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Clones all state data and populates the other world
+        /// </summary>
+        /// <param name="other"></param>
+        public void Overwrite(World other)
+        {
+            // This is guranteed to generate garbage. Possible option is to clear and fill arrays manually.
+            // Problem is that stack doesn't have an indexer. ugh. default lib sucks.
+            other.destroyedEntities = new Stack<int>(other.destroyedEntities);
+            other.entities = new List<EntityPointer>(other.entities);
+
+            // Overwrite all archetypes
+            foreach (var archetype in archetypes)
+            {
+                other.CreateOrGetArchetype(archetype.ComponentTypes, out int index);
+
+                archetype.Overwrite(other.archetypes[index]);
+            }
+        }
+
+        public IEnumerator<Entity> GetEnumerator()
+        {
+            return new WorldEnumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

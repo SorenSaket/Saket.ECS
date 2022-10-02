@@ -78,6 +78,39 @@ namespace Saket.ECS.Tests
             Assert.AreEqual(1, a.Capacity);
         }
 
+        [TestMethod]
+        public void Test_Archetype_Clear()
+        {
 
+        }
+
+        [TestMethod]
+        public void Test_Archetype_Overwrite()
+        {
+            var vel = new Velocity(255, 643);
+            var com = new Complex(0.42915f, 1.8456f, true);
+            var components = new HashSet<Type>()
+            {
+                typeof(Complex),
+                typeof(Velocity)
+            };
+
+            Archetype arc1 = new Archetype(components);
+            arc1.AddEntity();
+            arc1.Set(0, vel);
+            arc1.AddEntity();
+            arc1.Set(1, com);
+
+
+            Archetype arc2 = new Archetype(components);
+
+            arc1.Overwrite(arc2);
+
+            Assert.AreEqual(vel, arc2.Get<Velocity>(0));
+            Assert.AreEqual(com, arc2.Get<Complex>(1));
+
+            Assert.AreEqual(2, arc2.Capacity);
+            Assert.AreEqual(2, arc2.Count);
+        }
     }
 }

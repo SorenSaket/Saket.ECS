@@ -43,5 +43,19 @@ namespace Saket.ECS.Tests
             Assert.AreEqual(inputVelocity, world.archetypes[1].storage[typeof(Velocity)].Get<Velocity>(0));
         }
 
+
+        [TestMethod]
+        public void Test_World_Clear()
+        {
+
+        }
+
+        [TestMethod]
+        public void Test_World_Overwrite()
+        {
+            //World a = new World();
+            //var e1 = a.CreateEntity();
+            //e1.Add<Velocity>(new Velocity())
+        }
     }
 }

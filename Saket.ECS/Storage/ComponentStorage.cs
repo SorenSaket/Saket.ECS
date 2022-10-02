@@ -105,8 +105,6 @@ namespace Saket.ECS.Storage
         }
         #endregion
 
-
-
         #region Pointer based IComponentStorage
         
         /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
@@ -141,7 +139,6 @@ namespace Saket.ECS.Storage
 
         #endregion
 
-        #region Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EnsureCapacity(in int requiredCapacity)
@@ -155,11 +152,21 @@ namespace Saket.ECS.Storage
 
             // https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.reallochglobal?view=net-6.0
             // "the original memory block has been freed"
-            data = (byte*)Marshal.ReAllocHGlobal(new IntPtr(data), new IntPtr(newCapacity*ItemSizeInBytes)).ToPointer();
+            data = (byte*)Marshal.ReAllocHGlobal(new IntPtr(data), new IntPtr(newCapacity * ItemSizeInBytes)).ToPointer();
             Capacity = newCapacity;
         }
-
-        #endregion
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Zero(in int index)
+        {
+#if DEBUG
+            if (index >= Capacity || index < 0)
+                throw new ArgumentOutOfRangeException("Index out of range");
+#endif
+            for (int i = 0; i < ItemSizeInBytes; i++)
+            {
+                (data[ItemSizeInBytes * index]) = 0;
+            }
+        }
     }
 }

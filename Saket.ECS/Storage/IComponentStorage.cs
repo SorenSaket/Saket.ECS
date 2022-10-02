@@ -22,6 +22,9 @@ namespace Saket.ECS.Storage
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IComponentStorage
     {
         /// <summary> The number of components stored </summary>
@@ -54,8 +57,27 @@ namespace Saket.ECS.Storage
         /// <returns>A pointer to element at that index</returns>
         public unsafe void* Get(in int index);
 
-
+        /// <summary>
+        /// Ensure capacity of number of components
+        /// </summary>
+        /// <param name="requiredCapacity">The requied number of components</param>
         public void EnsureCapacity(in int requiredCapacity);
+
+        public unsafe void CloneTo(IComponentStorage other)
+        {
+            other.EnsureCapacity(Capacity);
+            for (int i = 0; i < Capacity; i++)
+            {
+                other.Set(i, this.Get(i));
+            }
+        }
+
+
+        /// <summary>
+        /// Zeros out all associated data with component
+        /// </summary>
+        /// <param name="index"></param>
+        public void Zero(in int index);
     }
 
 }

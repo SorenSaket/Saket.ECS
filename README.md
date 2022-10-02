@@ -60,7 +60,6 @@ Targeting release of 0.1.0 where all basic features are implemented, working and
 TODO for 0.1.0:
 - Query Caching
 	- Query Cache invalidation? dynamically modify queries as entities are created/modified
-- Convert storage to resizing model
 - Defer Spawn/Destroy Commands. Ensure in system command execution is possible to allow for lockless parallel execution.
 - Parallel System Execution
 

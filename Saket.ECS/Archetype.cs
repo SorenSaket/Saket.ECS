@@ -23,17 +23,16 @@ namespace Saket.ECS
         /// <summary> Current Number of Entities </summary>
         public int Count { get; private set; }
         
-        /// <summary>The maximum number of entities</summary>
+        /// <summary> The minimum allocated number of entities. The acutual allocation is up to the storage</summary>
         public int Capacity { get; private set; }
 
-
-        /// <summary> Used to recycle entity IDs </summary>
+        /// <summary> Used to recycle rows/entities </summary>
         public Stack<int> avaliableRows = new Stack<int>();
 
         /// <summary> The components stored in archetype. Cannot be changed after construction</summary>
-        public readonly HashSet<Type> ComponentTypes;
+        public HashSet<Type> ComponentTypes { get; protected set; }
         /// <summary> Hashcode of component composition </summary>
-        private readonly int componentHash = 0;
+        private int componentHash = 0;
 
         /// <summary> Where the components are stored </summary>
         public Dictionary<Type, IComponentStorage> storage;
@@ -56,18 +55,24 @@ namespace Saket.ECS
             }
         }
 
-
-     
-
         internal int AddEntity()
         {
-            if(avaliableRows.Count > 0)
+
+            /*TODO
+             // Clear reused storage 
+                int row = avaliableRows.Pop();
+                foreach (var store in storage)
+                {
+                    store.Value.Zero(row);
+                }
+             */
+            if (avaliableRows.Count > 0)
             {
                 Count++;
                 return avaliableRows.Pop();
             }
-            Capacity++;
             Count++;
+            Capacity++;
             foreach (var store in storage)
             {
                 store.Value.EnsureCapacity(Capacity);
@@ -91,7 +96,6 @@ namespace Saket.ECS
                 Count--;
             }
         }
-
 
 
         #region Component
@@ -131,7 +135,7 @@ namespace Saket.ECS
         }
 #endregion
 
-#region Other
+        #region Other
         public static int GetComponentGroupHashCode(HashSet<Type> components)
         {
             int hashCode = 31;
@@ -165,6 +169,39 @@ namespace Saket.ECS
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Clears all entity related data
+        /// Does not deallocate memory
+        /// </summary>
+        public void Clear()
+        {
+            Count = 0;
+            Capacity = 0;
+            avaliableRows.Clear();
+        }
+
+        /// <summary>
+        /// Clone all storage to other archetype. Does not clone storages that does not exsist on other
+        /// Ensure that other.ComponentTypes == ComponentTypes
+        /// </summary>
+        /// <param name="other"></param>
+        public void Overwrite(Archetype other)
+        {
+            other.Count = Count;
+            other.Capacity = Capacity;
+            other.avaliableRows = new Stack<int>(avaliableRows);
+
+            // Clone all storage
+            foreach (var store in storage)
+            {
+                // Ensure the other storage exists on archetype
+                if(other.storage.ContainsKey(store.Key))
+                    store.Value.CloneTo(other.storage[store.Key]);
+            }
+            
+        }
+
         #endregion
     }
 }
