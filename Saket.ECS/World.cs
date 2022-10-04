@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace Saket.ECS
@@ -62,7 +63,7 @@ namespace Saket.ECS
         }
 
         // Get already created entity
-        public Entity? GetEntity(int entityID)
+        public Entity? GetEntity(in int entityID)
         {
             if(entityID < 0 || entityID >= entities.Count)
                 return null;
@@ -71,7 +72,7 @@ namespace Saket.ECS
             return new Entity(this, entities[entityID]);
         }
 
-        public void DestroyEntity(int entityID)
+        public void DestroyEntity(in int entityID)
         {
             if (!destroyedEntities.Contains(entityID))
             {

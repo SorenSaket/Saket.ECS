@@ -36,9 +36,9 @@ namespace Saket.ECS.Storage
         public int ItemSizeInBytes { get; }
         // Safe
 
-        public T Get<T>(in int index) where T : unmanaged;
+        public T Get<T>(int index) where T : unmanaged;
 
-        public void Set<T>(in int index, in T value) where T : unmanaged;
+        public void Set<T>(int index, in T value) where T : unmanaged;
 
 
         // Unsafe 
@@ -48,20 +48,20 @@ namespace Saket.ECS.Storage
         /// </summary>
         /// <param name="index">Index of the element to copy to</param>
         /// <param name="value">Pointer to the item to be copied</param>
-        public unsafe void Set(in int index, in void* value);
+        public unsafe void Set(int index, void* value);
         
         /// <summary>
         /// Gets a pointer to specific element
         /// </summary>
         /// <param name="index"></param>
         /// <returns>A pointer to element at that index</returns>
-        public unsafe void* Get(in int index);
+        public unsafe void* Get(int index);
 
         /// <summary>
         /// Ensure capacity of number of components
         /// </summary>
         /// <param name="requiredCapacity">The requied number of components</param>
-        public void EnsureCapacity(in int requiredCapacity);
+        public void EnsureCapacity(int requiredCapacity);
 
         public unsafe void CloneTo(IComponentStorage other)
         {
@@ -77,7 +77,7 @@ namespace Saket.ECS.Storage
         /// Zeros out all associated data with component
         /// </summary>
         /// <param name="index"></param>
-        public void Zero(in int index);
+        public void Zero(int index);
     }
 
 }

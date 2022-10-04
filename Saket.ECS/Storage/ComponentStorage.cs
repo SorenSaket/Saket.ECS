@@ -67,7 +67,7 @@ namespace Saket.ECS.Storage
         #endregion
 
         #region Generic IComponentStorage
-        public void Set<T>(in int index, in T item) where T : unmanaged
+        public void Set<T>(int index, in T item) where T : unmanaged
         {
 #if DEBUG
             if (!typeof(T).Equals(ComponentType))
@@ -93,7 +93,7 @@ namespace Saket.ECS.Storage
         // Marshal.ReAllocHGlobal
         // Marshal.PrelinkAll is interesting to avoid jit penalty runtime
 
-        public T Get<T>(in int index) where T : unmanaged
+        public T Get<T>(int index) where T : unmanaged
         {
 #if DEBUG
             if (!typeof(T).Equals(ComponentType))
@@ -108,7 +108,7 @@ namespace Saket.ECS.Storage
         #region Pointer based IComponentStorage
         
         /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
-        public unsafe void Set(in int index, in void* item)
+        public unsafe void Set(int index, void* item)
         {
 #if DEBUG
             if (index >= Capacity || index < 0)
@@ -128,7 +128,7 @@ namespace Saket.ECS.Storage
         }
 
         /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
-        public unsafe void* Get(in int index)
+        public unsafe void* Get(int index)
         {
 #if DEBUG
         if (index >= Capacity || index < 0)
@@ -141,7 +141,7 @@ namespace Saket.ECS.Storage
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void EnsureCapacity(in int requiredCapacity)
+        public void EnsureCapacity(int requiredCapacity)
         {
             int newCapacity = Capacity;
             // Double the capacity until theres enough
@@ -157,7 +157,7 @@ namespace Saket.ECS.Storage
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Zero(in int index)
+        public void Zero(int index)
         {
 #if DEBUG
             if (index >= Capacity || index < 0)

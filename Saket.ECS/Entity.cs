@@ -178,7 +178,6 @@ namespace Saket.ECS
         {
             return World.archetypes[EntityPointer.index_archetype].Get<T>(EntityPointer.index_row);
         }
-
         public T? TryGet<T>()
           where T : unmanaged
         {
@@ -200,6 +199,15 @@ namespace Saket.ECS
              where T : unmanaged
         {
             World.archetypes[EntityPointer.index_archetype].Set<T>(EntityPointer.index_row, value);
+        }
+
+        public unsafe void* Get(Type type, int index_element)
+        {
+            return World.archetypes[EntityPointer.index_archetype].storage[type].Get(index_element);
+        }
+        public unsafe void Set(Type type, int index_element, void* value)
+        {
+            World.archetypes[EntityPointer.index_archetype].storage[type].Set(index_element, value);
         }
     }
 }
