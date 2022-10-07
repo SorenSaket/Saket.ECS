@@ -61,9 +61,11 @@ namespace Saket.ECS
                 return new Entity(this, a);
             }
         }
+        
 
+        // Get and destroy should use entitypointers and not id. Since Version can change.
         // Get already created entity
-        public Entity? GetEntity(in int entityID)
+        public Entity? GetEntity(int entityID)
         {
             if(entityID < 0 || entityID >= entities.Count)
                 return null;
@@ -72,7 +74,7 @@ namespace Saket.ECS
             return new Entity(this, entities[entityID]);
         }
 
-        public void DestroyEntity(in int entityID)
+        public void DestroyEntity(int entityID)
         {
             if (!destroyedEntities.Contains(entityID))
             {

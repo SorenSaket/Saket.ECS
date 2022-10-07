@@ -39,5 +39,15 @@ namespace Saket.ECS
         {
             return HashCode.Combine(ID,version);
         }
+
+        public static bool operator ==(EntityPointer left, EntityPointer right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(EntityPointer left, EntityPointer right)
+        {
+            return !(left == right);
+        }
     }
 }
