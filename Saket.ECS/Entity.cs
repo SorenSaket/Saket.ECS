@@ -107,7 +107,7 @@ namespace Saket.ECS
 
 
 
-		internal unsafe void CopyAllComponentsToArchetype(Archetype target, int row)
+		internal unsafe void CopyAllComponentsToArchetype(Archetype target, int targetRow)
         {
 #if DEBUG
             if(EntityPointer.index_archetype == -1)
@@ -121,7 +121,7 @@ namespace Saket.ECS
             {
                 if (target.storage.TryGetValue(storage_from.Value.ComponentType, out var storage_to))
                 {
-                    storage_to.Set(row, storage_from.Value.Get(row));
+                    storage_to.Set(targetRow, storage_from.Value.Get(EntityPointer.index_row));
                 }
             }
         }
@@ -144,11 +144,12 @@ namespace Saket.ECS
 		internal void MoveToNewArchetype(HashSet<Type> components, out Archetype newArchetype)
 		{
 			Archetype currentArchetype = null;
+            
 			if (EntityPointer.index_archetype != -1)
 			{
 				currentArchetype = World.archetypes[EntityPointer.index_archetype];
-
-				if(currentArchetype.ComponentTypes.SetEquals(components))
+                // If the new archetype is the same as old
+                if (currentArchetype.ComponentTypes.SetEquals(components))
 				{
 					newArchetype = currentArchetype;
 					return;
@@ -162,13 +163,13 @@ namespace Saket.ECS
 			// Copy old values to new archetype
 			if (currentArchetype != null)
 			{
-				CopyAllComponentsToArchetype(newArchetype, EntityPointer.index_row);
+				CopyAllComponentsToArchetype(newArchetype, entityIndex);
 				// Remove from old  
 				currentArchetype.RemoveEntity(EntityPointer.index_row);
 			}
 		
 			// Update entity pointer
-			EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
+			this.EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
 			// Update pointer in world
 			World.entities[EntityPointer.ID] = EntityPointer;
 		}
@@ -201,13 +202,13 @@ namespace Saket.ECS
             World.archetypes[EntityPointer.index_archetype].Set<T>(EntityPointer.index_row, value);
         }
 
-        public unsafe void* Get(Type type, int index_element)
+        public unsafe void* Get(Type type)
         {
-            return World.archetypes[EntityPointer.index_archetype].storage[type].Get(index_element);
+            return World.archetypes[EntityPointer.index_archetype].storage[type].Get(EntityPointer.index_row);
         }
-        public unsafe void Set(Type type, int index_element, void* value)
+        public unsafe void Set(Type type, void* value)
         {
-            World.archetypes[EntityPointer.index_archetype].storage[type].Set(index_element, value);
+            World.archetypes[EntityPointer.index_archetype].storage[type].Set(EntityPointer.index_row, value);
         }
     }
 }

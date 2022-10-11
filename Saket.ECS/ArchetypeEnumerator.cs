@@ -35,7 +35,7 @@ namespace Saket.ECS
             }
             while (archetype.avaliableRows.Contains(position));
             counter++;
-            return (counter < archetype.Count);
+            return (counter <= archetype.Count);
         }
 
         public void Reset()

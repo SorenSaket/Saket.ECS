@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -19,14 +20,14 @@ namespace Saket.ECS.Tests.Storage
         [TestMethod]
         public void Test_Storage_Basic()
         {
-            ComponentStorage store = new ComponentStorage(typeof(Complex));
+            ComponentStorage store = new ComponentStorage(typeof(Velocity));
             store.EnsureCapacity(10000);
             Random random = new Random();
 
             for (int i = 0; i < 10; i++)
             {
                 int index = random.Next(9999);
-                Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
+                Velocity input = new Velocity((float)random.NextDouble(), (float)random.NextDouble());
                 storetest(store, index, input);
             }
 
@@ -82,12 +83,9 @@ namespace Saket.ECS.Tests.Storage
             // Random fill value
             Random random = new Random();
 
-            // Input value
-            Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
-
-
             for (int y = 0; y < 10; y++)
             {
+                Complex input = new Complex((float)random.NextDouble(), (float)random.NextDouble(), true);
                 from.Set(y, input);
             }
 
@@ -98,11 +96,27 @@ namespace Saket.ECS.Tests.Storage
 
             for (int y = 0; y < 10; y++)
             {
-                Assert.AreEqual(input, to.Get<Complex>(y));
+                Assert.AreEqual(from.Get<Complex>(y), to.Get<Complex>(y));
             }
         }
+        
+        
+        /// <summary>
+        /// Ensures that storage stay constant through expansion
+        /// </summary>
+        [TestMethod]
+        public void Test_Storage_Expansion()
+        {
+            var vel = new Velocity(323.323f, 1239f);
+            ComponentStorage store = new ComponentStorage(typeof(Velocity));
+            store.Set(0, vel);
+            store.Set(7, vel);
 
+            store.EnsureCapacity(69);
 
+            Assert.AreEqual(vel,store.Get<Velocity>(0));
+            Assert.AreEqual(vel, store.Get<Velocity>(7));
+        }
 
 
 

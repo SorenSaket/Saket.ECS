@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -41,20 +42,42 @@ namespace Saket.ECS.Tests
         }
     }
 
-    struct Velocity
+    struct Velocity : IEquatable<Velocity>
     {
-        public float x;
-        public float y;
-
+        Vector2 position;
         public Velocity(float x, float y)
         {
-            this.x = x;
-            this.y = y;
+            position = new Vector2(x, y);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Velocity velocity && Equals(velocity);
+        }
+
+        public bool Equals(Velocity other)
+        {
+            return position.Equals(other.position);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(position);
+        }
+
+        public static bool operator ==(Velocity left, Velocity right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Velocity left, Velocity right)
+        {
+            return !(left == right);
         }
     }
 
 
-    struct Complex : IComponent
+    struct Complex : IComponent, IEquatable<Complex>
     {
         public float value;
         public float value2;
@@ -67,6 +90,32 @@ namespace Saket.ECS.Tests
             this.cool = cool;
         }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is Complex complex && Equals(complex);
+        }
+
+        public bool Equals(Complex other)
+        {
+            return value == other.value &&
+                   value2 == other.value2 &&
+                   cool == other.cool;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static bool operator ==(Complex left, Complex right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Complex left, Complex right)
+        {
+            return !(left == right);
+        }
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 6)]
