@@ -20,7 +20,7 @@ namespace Saket.ECS
         public List<Archetype> archetypes;
 
         /// <summary> All the entities currently in the world. When entity is removed they still exists in this data structure </summary>
-        public List<EntityPointer> entities;
+        public List<InternalEntityPointer> entities;
 
         // Maintain query when objects are added/removed
         // Queries maintain their validity troughout a single update since all modifcation (create/destroy, add/remove component) to entities are defered to end of update
@@ -40,7 +40,7 @@ namespace Saket.ECS
         {
             const int initialSize = 1024;
             this.archetypes = new List<Archetype>();
-            this.entities = new List<EntityPointer>(initialSize);
+            this.entities = new List<InternalEntityPointer>(initialSize);
             this.destroyedEntities = new();
             this.resources = new();
             queries = new();
@@ -52,12 +52,12 @@ namespace Saket.ECS
             // Search for
             if(destroyedEntities.Count > 0)
             {
-                return new Entity(this, entities[destroyedEntities.Pop()]);
+                return new Entity(this, entities[destroyedEntities.Pop()].Pointer);
             }
             else
             {
-                var a = new EntityPointer(entities.Count, 0, -1, -1);
-                entities.Add(a);
+                var a = new EntityPointer(entities.Count, 0);
+                entities.Add(new InternalEntityPointer(-1,-1,a));
                 return new Entity(this, a);
             }
         }
@@ -65,26 +65,34 @@ namespace Saket.ECS
 
         // Get and destroy should use entitypointers and not id. Since Version can change.
         // Get already created entity
-        public Entity? GetEntity(int entityID)
+        public Entity? GetEntity(EntityPointer entity)
         {
-            if(entityID < 0 || entityID >= entities.Count)
+            if (destroyedEntities.Contains(entity.ID))
                 return null;
-            if (destroyedEntities.Contains(entityID))
-                return null;
-            return new Entity(this, entities[entityID]);
+
+            if(entities[entity.ID].Pointer == entity)
+                return new Entity(this, entity);
+
+            return null;
         }
 
-        public void DestroyEntity(int entityID)
+        public void DestroyEntity(ref EntityPointer entity)
         {
-            if (!destroyedEntities.Contains(entityID))
+            // 
+            if (!destroyedEntities.Contains(entity.ID) && entity.Valid && entity.ID < entities.Count)
             {
-                destroyedEntities.Push(entityID);
-                var old = entities[entityID];
+                destroyedEntities.Push(entity.ID);
+                InternalEntityPointer old = entities[entity.ID];
                 // Remove from archetype
-                if (old.index_archetype != -1 && old.index_row != -1)
-                    archetypes[old.index_archetype].RemoveEntity(old.index_row);
+                if (old.Archetype != -1 && old.Row != -1)
+                    archetypes[old.Archetype].RemoveEntity(old.Row);
                 // Reset the pointer and advance version counter
-                entities[entityID] = new EntityPointer(entityID, old.version+1);
+                entity = new EntityPointer(entity.ID, old.Pointer.Version + 1);
+                entities[entity.ID] = new InternalEntityPointer(-1, -1, entity);
+            }
+            else 
+            {
+                throw new InvalidOperationException("Entity is already destroyed");
             }
         }
 
@@ -106,6 +114,17 @@ namespace Saket.ECS
                 return (T)resources[typeof(T)];
             }
             return default(T);
+        }
+
+        public bool HasResource<T>(out T value)
+        {
+            if (resources.ContainsKey(typeof(T)))
+            {
+                value = (T)resources[typeof(T)];
+                return true;
+            }
+            value = default(T);
+            return false;
         }
 
 
@@ -156,8 +175,8 @@ namespace Saket.ECS
             // TODO this is slow
             for (int i = 0; i < entities.Count; i++)
             {
-                if (_archetypes.Contains(entities[i].index_archetype) )
-                    if(!archetypes[entities[i].index_archetype].avaliableRows.Contains(entities[i].index_row)) // Do not include deleted entities.
+                if (_archetypes.Contains(entities[i].Archetype) )
+                    if(!archetypes[entities[i].Archetype].avaliableRows.Contains(entities[i].Row)) // Do not include deleted entities.
                         _entities.Add(i);
             }
         }
@@ -235,7 +254,7 @@ namespace Saket.ECS
             // This is guranteed to generate garbage. Possible option is to clear and fill arrays manually.
             // Problem is that stack doesn't have an indexer. ugh. default lib sucks.
             other.destroyedEntities = new Stack<int>(other.destroyedEntities);
-            other.entities = new List<EntityPointer>(other.entities);
+            other.entities = new List<InternalEntityPointer>(other.entities);
 
             // Overwrite all archetypes
             foreach (var archetype in archetypes)

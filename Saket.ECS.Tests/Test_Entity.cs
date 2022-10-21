@@ -17,7 +17,8 @@ namespace Saket.ECS.Tests
 
             var e = world.CreateEntity();
 
-            Assert.AreEqual(e.EntityPointer, world.entities[0]);
+            Assert.AreEqual(e.EntityPointer, world.entities[0].Pointer);
+
         }
 
         [TestMethod]
@@ -57,12 +58,13 @@ namespace Saket.ECS.Tests
             World world = new World();
 
             var e = world.CreateEntity();
-
+            Assert.AreEqual(e.EntityPointer.ID, 0);
             e.Add(inputPosition);
-            Assert.AreEqual(e.EntityPointer.index_archetype, 0);
+            Assert.AreEqual(e.EntityPointer.ID, 0);
             e.Add(inputVelocity);
-            Assert.AreEqual(e.EntityPointer.index_archetype, 1);
-            Assert.AreEqual(e.EntityPointer.index_row, 0);
+            Assert.AreEqual(e.EntityPointer.ID, 0);
+            Assert.AreEqual(e.Archetype, 1);
+            Assert.AreEqual(e.Row, 0);
 
             var actualPosition = e.Get<Position>();
 

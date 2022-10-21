@@ -3,28 +3,29 @@
 namespace Saket.ECS
 {
     /// <summary>
-    /// 
+    /// Consists of an ID and version Number
     /// </summary>
     public struct EntityPointer 
     {
-        // This should never change after construction
-        public readonly int ID;
+        public static readonly EntityPointer Default = new(-1,-1);
+        
+
+        public bool Valid
+        {
+            get => ID >= 0 && Version >= 0;
+                
+        }
+
+        public int ID;
         /// <summary>
         /// Current version
         /// </summary>
-        public int version;
-        /// <summary>
-        /// 
-        /// </summary>
-        public int index_archetype;
-        public int index_row;
+        public int Version;
 
-        public EntityPointer(int ID, int version = 0, int index_archetype = -1, int index_row = -1)
+        public EntityPointer(int ID, int version = 0)
         {
             this.ID = ID;
-            this.version = version;
-            this.index_archetype = index_archetype;
-            this.index_row = index_row;
+            this.Version = version;
         }
 
         public override bool Equals(object? obj)
@@ -33,11 +34,11 @@ namespace Saket.ECS
         }
         public bool Equals(EntityPointer other)
         {
-            return ID == other.ID && version == other.version;
+            return ID == other.ID && Version == other.Version;
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(ID,version);
+            return HashCode.Combine(ID,Version);
         }
 
         public static bool operator ==(EntityPointer left, EntityPointer right)

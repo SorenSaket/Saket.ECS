@@ -42,7 +42,6 @@ namespace Saket.ECS
             Exclusive = new HashSet<Type>();
             AnyGroups = new HashSet<Type[]>();
         }
-
         public Query Any<T1>()
         {
             throw new NotImplementedException();
