@@ -181,20 +181,18 @@ namespace Saket.ECS
 
 			// Get New archetype
 			newArchetype = World.CreateOrGetArchetype(components, out int newArchetypeIndex);
-			int entityIndex = newArchetype.AddEntity();
+			int newEntityRow = newArchetype.AddEntity();
 		
 			// Copy old values to new archetype
 			if (currentArchetype != null)
 			{
-				CopyAllComponentsToArchetype(newArchetype, entityIndex);
+				CopyAllComponentsToArchetype(newArchetype, newEntityRow);
 				// Remove from old  
 				currentArchetype.RemoveEntity(Row);
 			}
-		
-			// Update entity pointer
-			this.EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.Version);
+		    
 			// Update pointer in world
-			World.entities[EntityPointer.ID] = new InternalEntityPointer(newArchetypeIndex, entityIndex, this.EntityPointer);
+			World.entities[EntityPointer.ID] = new InternalEntityPointer(newArchetypeIndex, newEntityRow, World.entities[EntityPointer.ID].Version);
 		}
 
         public T Get<T>()

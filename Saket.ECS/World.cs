@@ -19,7 +19,10 @@ namespace Saket.ECS
         //
         public List<Archetype> archetypes;
 
-        /// <summary> All the entities currently in the world. When entity is removed they still exists in this data structure </summary>
+        /// <summary> 
+        /// All the entities currently in the world. 
+        /// When entity is destroyed they still exists in this data structure .
+        /// </summary>
         public List<InternalEntityPointer> entities;
 
         // Maintain query when objects are added/removed
@@ -32,9 +35,16 @@ namespace Saket.ECS
         // 
         internal Dictionary<int, bool> queriesdirty;
 
+        /// <summary>
+        /// Generic reference storage to managed/unmanged resources.
+        /// </summary>
         internal Dictionary<Type, object> resources;
 
+        /// <summary>
+        /// Stack of entity ID/Indexes that are destroyed.
+        /// </summary>
         internal Stack<int> destroyedEntities;
+
 
         public World()
         {
@@ -49,46 +59,106 @@ namespace Saket.ECS
 
         public Entity CreateEntity()
         {
-            // Search for
+            // Search for destroyed entities for reuse
             if(destroyedEntities.Count > 0)
             {
-                return new Entity(this, entities[destroyedEntities.Pop()].Pointer);
+                int id = destroyedEntities.Pop();
+                return new Entity(this, new EntityPointer(id, entities[id].Version));
             }
             else
             {
-                var a = new EntityPointer(entities.Count, 0);
-                entities.Add(new InternalEntityPointer(-1,-1,a));
-                return new Entity(this, a);
+                // Create new entity 
+                // entities.Count will point to the last
+                // Version starts off at 0
+                var newEntity = new EntityPointer(entities.Count, 0);
+
+                entities.Add(new InternalEntityPointer(-1,-1,0));
+
+                return new Entity(this, newEntity);
             }
         }
 
 
-        // Get and destroy should use entitypointers and not id. Since Version can change.
-        // Get already created entity
-        public Entity? GetEntity(EntityPointer entity)
+
+        /// <summary>
+        /// Get already created entity
+        /// </summary>
+        /// <param name="pointer"></param>
+        /// <returns></returns>
+        public Entity GetEntity(EntityPointer pointer)
         {
-            if (destroyedEntities.Contains(entity.ID))
-                return null;
+            // The entity exists but is destroyed
+            if (destroyedEntities.Contains(pointer.ID))
+                throw new ArgumentException("GetEntity Failed: Entity is destroyed");
 
-            if(entities[entity.ID].Pointer == entity)
-                return new Entity(this, entity);
+            // If the entity.ID is within bounds
+            if(pointer.ID > 0 && pointer.ID < entities.Count)
+                // if the version number matches with the one stored
+                if(entities[pointer.ID].Version == pointer.Version)
+                    return new Entity(this, pointer);
 
-            return null;
+            throw new ArgumentException("GetEntity Failed: Entity doesn't anymore");
         }
 
-        public void DestroyEntity(ref EntityPointer entity)
+        /// <summary>
+        /// Get already created entity
+        /// </summary>
+        /// <param name="pointer"></param>
+        /// <returns></returns>
+        public bool TryGetEntity(EntityPointer pointer, out Entity entity)
+        {
+            // The entity exists but is destroyed
+            if (destroyedEntities.Contains(pointer.ID))
+            {
+                entity = new Entity(this, EntityPointer.Default);
+                return false;
+            }
+                
+
+            // If the entity.ID is within bounds
+            if (pointer.ID > 0 && pointer.ID < entities.Count)
+                // if the version number matches with the one stored
+                if (entities[pointer.ID].Version == pointer.Version)
+                {
+                    entity = new Entity(this, pointer);
+                    return true;
+                }
+
+            entity = new Entity(this, EntityPointer.Default);
+            return false;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pointer"></param>
+        /// <exception cref="InvalidOperationException"> When the entity already is destroyed</exception>
+        public void DestroyEntity(ref EntityPointer pointer)
         {
             // 
-            if (!destroyedEntities.Contains(entity.ID) && entity.Valid && entity.ID < entities.Count)
+            if (!destroyedEntities.Contains(pointer.ID) && pointer.Valid && pointer.ID < entities.Count)
             {
-                destroyedEntities.Push(entity.ID);
-                InternalEntityPointer old = entities[entity.ID];
-                // Remove from archetype
+                // Add to destroyed entities
+                destroyedEntities.Push(pointer.ID);
+                
+                //
+                InternalEntityPointer old = entities[pointer.ID];
+                
+                // If the entity was assigned an archetype
                 if (old.Archetype != -1 && old.Row != -1)
+                    // Remove from archetype
                     archetypes[old.Archetype].RemoveEntity(old.Row);
-                // Reset the pointer and advance version counter
-                entity = new EntityPointer(entity.ID, old.Pointer.Version + 1);
-                entities[entity.ID] = new InternalEntityPointer(-1, -1, entity);
+
+                // Invalidate the pointer
+                pointer = EntityPointer.Default;
+
+                // Unchecked will cause the version number to wrap around
+                unchecked
+                {
+                    // Deassign archetype and increment version on the internal pointer
+                    entities[pointer.ID] = new InternalEntityPointer(-1, -1, old.Version + 1);
+                }
             }
             else 
             {

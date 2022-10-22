@@ -8,15 +8,16 @@ namespace Saket.ECS
 {
     public struct InternalEntityPointer
     {
-        public int Archetype;
-        public int Row;
-        public EntityPointer Pointer;
+        public int Archetype = -1;
+        public int Row = -1;
+        public uint Version = 0;
+        //public int ID;
 
-        public InternalEntityPointer(int archetype, int row, EntityPointer pointer)
+        public InternalEntityPointer(int archetype = -1, int row =-1, uint version = 0)
         {
             Archetype = archetype;
             Row = row;
-            Pointer = pointer;
+            Version = version;
         }
     }
 }

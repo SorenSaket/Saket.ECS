@@ -3,8 +3,10 @@ Work in progress Archetype Entity Component System (ECS) in C#
 Current Features:
 
 - Full C# Archetype ECS system
+- Non-limited Archetype and Component Count
 - Easily add multiple components to Entities with Bundles
 - Shared Resources (singleton components) per world.
+
 
 Usage Example:
 ```csharp
@@ -62,7 +64,6 @@ TODO for 0.1.0:
 	- Query Cache invalidation? dynamically modify queries as entities are created/modified
 - Defer Spawn/Destroy Commands. Ensure in system command execution is possible to allow for lockless parallel execution.
 - Parallel System Execution
-
 
 TODO Future Releases:
 - Entity World Transfer

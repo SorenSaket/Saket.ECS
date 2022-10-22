@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Saket.ECS
 {
@@ -7,22 +8,28 @@ namespace Saket.ECS
     /// </summary>
     public struct EntityPointer 
     {
-        public static readonly EntityPointer Default = new(-1,-1);
+        public static readonly EntityPointer Default = new(-1,0);
         
-
+        /// <summary>
+        /// If the Pointer is pointing to a potentionally valid entity
+        /// Note that this check doesn't prevent the pointer from being out of range
+        /// </summary>
         public bool Valid
         {
-            get => ID >= 0 && Version >= 0;
-                
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ID >= 0;        
         }
 
+        /// <summary>
+        /// ID, Index into world
+        /// </summary>
         public int ID;
         /// <summary>
         /// Current version
         /// </summary>
-        public int Version;
+        public uint Version;
 
-        public EntityPointer(int ID, int version = 0)
+        public EntityPointer(int ID, uint version = 0)
         {
             this.ID = ID;
             this.Version = version;

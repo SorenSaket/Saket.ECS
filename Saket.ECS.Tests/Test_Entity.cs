@@ -15,9 +15,26 @@ namespace Saket.ECS.Tests
         {
             World world = new World();
 
-            var e = world.CreateEntity();
+            var a = world.CreateEntity();
+            Assert.AreEqual((uint)0, a.EntityPointer.Version);
+            Assert.AreEqual(0, a.EntityPointer.ID);
+            Assert.AreEqual(-1, world.entities[0].Archetype);
+            Assert.AreEqual(-1, world.entities[0].Row);
+            Assert.AreEqual((uint)0, world.entities[0].Version);
 
-            Assert.AreEqual(e.EntityPointer, world.entities[0].Pointer);
+            var b = world.CreateEntity();
+
+            Assert.AreEqual(1, b.EntityPointer.ID);
+            Assert.AreEqual((uint)0, b.EntityPointer.Version);
+            Assert.AreEqual((uint)0, a.EntityPointer.Version);
+
+            Assert.AreEqual(-1, world.entities[0].Archetype);
+            Assert.AreEqual(-1, world.entities[0].Row);
+            Assert.AreEqual((uint)0, world.entities[0].Version);
+
+            Assert.AreEqual(-1, world.entities[1].Archetype);
+            Assert.AreEqual(-1, world.entities[1].Row);
+            Assert.AreEqual((uint)0, world.entities[1].Version);
 
         }
 

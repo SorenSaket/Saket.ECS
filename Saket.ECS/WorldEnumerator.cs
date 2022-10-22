@@ -11,7 +11,7 @@ namespace Saket.ECS
 {
     public struct WorldEnumerator : IEnumerator<Entity>
     {
-        public Entity Current => new Entity(world, world.entities[position].Pointer);
+        public Entity Current => new Entity(world, new EntityPointer(position, world.entities[position].Version));
 
         object IEnumerator.Current => Current;
 
