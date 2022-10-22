@@ -16,19 +16,21 @@ namespace Saket.ECS
     {
         public bool Destroyed => ID == -1;
         public int ID => EntityPointer.ID;
-        public EntityPointer EntityPointer { get; private set; }
+        public EntityPointer EntityPointer { get => entityPointer;  }
         public readonly World World { get; }
+
+        private EntityPointer entityPointer;
 
         internal Entity(World world, EntityPointer pointer)
         {
             this.World = world;
-            this.EntityPointer = pointer;
+            entityPointer = pointer;
         }
 
         public void Destroy()
         {
-            World.DestroyEntity(ID);
-            EntityPointer = new EntityPointer(-1);
+            World.DestroyEntity(ref entityPointer);
+            entityPointer = new EntityPointer(-1);
         }
 
         
@@ -167,9 +169,9 @@ namespace Saket.ECS
 				// Remove from old  
 				currentArchetype.RemoveEntity(EntityPointer.index_row);
 			}
-		
-			// Update entity pointer
-			this.EntityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
+
+            // Update entity pointer
+            entityPointer = new EntityPointer(EntityPointer.ID, EntityPointer.version, newArchetypeIndex, entityIndex);
 			// Update pointer in world
 			World.entities[EntityPointer.ID] = EntityPointer;
 		}

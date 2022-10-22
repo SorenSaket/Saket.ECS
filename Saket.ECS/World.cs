@@ -61,30 +61,37 @@ namespace Saket.ECS
                 return new Entity(this, a);
             }
         }
-        
+
 
         // Get and destroy should use entitypointers and not id. Since Version can change.
         // Get already created entity
-        public Entity? GetEntity(int entityID)
+        public Entity? GetEntity(EntityPointer entity)
         {
-            if(entityID < 0 || entityID >= entities.Count)
+            if (destroyedEntities.Contains(entity.ID))
                 return null;
-            if (destroyedEntities.Contains(entityID))
-                return null;
-            return new Entity(this, entities[entityID]);
+
+            if (entities[entity.ID] == entity)
+                return new Entity(this, entity);
+
+            return null;
         }
 
-        public void DestroyEntity(int entityID)
+        public void DestroyEntity(ref EntityPointer entity)
         {
-            if (!destroyedEntities.Contains(entityID))
+            // 
+            if (!destroyedEntities.Contains(entity.ID) && entity.ID < entities.Count)
             {
-                destroyedEntities.Push(entityID);
-                var old = entities[entityID];
+                destroyedEntities.Push(entity.ID);
+                var old = entities[entity.ID];
                 // Remove from archetype
                 if (old.index_archetype != -1 && old.index_row != -1)
                     archetypes[old.index_archetype].RemoveEntity(old.index_row);
                 // Reset the pointer and advance version counter
-                entities[entityID] = new EntityPointer(entityID, old.version+1);
+                entities[entity.ID] = entity = new EntityPointer(entity.ID, old.version + 1);
+            }
+            else
+            {
+                throw new InvalidOperationException("Entity is already destroyed");
             }
         }
 
@@ -107,6 +114,18 @@ namespace Saket.ECS
             }
             return default(T);
         }
+
+        public bool HasResource<T>(out T value)
+        {
+            if (resources.ContainsKey(typeof(T)))
+            {
+                value = (T)resources[typeof(T)];
+                return true;
+            }
+            value = default(T);
+            return false;
+        }
+
 
 
         public QueryResult Query(Query query)

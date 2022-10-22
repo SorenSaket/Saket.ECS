@@ -7,6 +7,7 @@ namespace Saket.ECS
     /// </summary>
     public struct EntityPointer 
     {
+        public static readonly EntityPointer Default = new EntityPointer();
         // This should never change after construction
         public readonly int ID;
         /// <summary>
@@ -18,7 +19,13 @@ namespace Saket.ECS
         /// </summary>
         public int index_archetype;
         public int index_row;
-
+        public EntityPointer()
+        {
+            this.ID = -1;
+            this.version = -1;
+            this.index_archetype = -1;
+            this.index_row = -1;
+        }
         public EntityPointer(int ID, int version = 0, int index_archetype = -1, int index_row = -1)
         {
             this.ID = ID;
