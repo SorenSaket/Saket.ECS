@@ -43,12 +43,10 @@ namespace Saket.ECS
 
         private EntityPointer entityPointer;
 
-
-
         internal Entity(World world, EntityPointer pointer)
         {
             this.World = world;
-            this.EntityPointer = pointer;
+            entityPointer = pointer;
         }
 
         public void Destroy()

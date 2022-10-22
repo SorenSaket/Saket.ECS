@@ -82,7 +82,7 @@ namespace Saket.ECS
         }
         internal void RemoveEntity(int index_element)
         {
-            if(index_element >= Count)
+            if(index_element >= Capacity)
             {
                 throw new Exception("entity does not exist");
             }

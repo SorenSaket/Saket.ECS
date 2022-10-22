@@ -61,7 +61,7 @@ namespace Saket.ECS
                 return new Entity(this, a);
             }
         }
-        
+
 
         // Get and destroy should use entitypointers and not id. Since Version can change.
         // Get already created entity
