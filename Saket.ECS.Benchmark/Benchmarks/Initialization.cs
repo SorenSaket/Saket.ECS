@@ -21,6 +21,8 @@ namespace Saket.ECS.Benchmark.Benchmarks.Initialization
         {
             
         }
+
+
         [BenchmarkCategory("SveltoECS")]
         [Benchmark]
         public void SveltoECS()

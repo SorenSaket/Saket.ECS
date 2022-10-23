@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Running;
 using Saket.ECS;
+using Saket.ECS.Benchmark.Benchmarks.Iteration;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -9,7 +10,8 @@ public static class Program
     [STAThread]
     static void Main()
     {
-        
+        BenchmarkRunner.Run(typeof(Iteration));
+        Console.ReadKey();
     }
 }
 

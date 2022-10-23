@@ -6,7 +6,7 @@ Current Features:
 - Non-limited Archetype and Component Count
 - Easily add multiple components to Entities with Bundles
 - Shared Resources (singleton components) per world.
-
+- Fully Managed. No External dependencies.
 
 Usage Example:
 ```csharp
@@ -32,7 +32,7 @@ void Update(float Delta){
 	pipeline_update.Update(world, Delta);
 }
 
-Query query_positionVelocity = new Query().With<Postion>().With<Velocity>();
+Query query_positionVelocity = new Query().With<(Postion, Velocity)>();
 
 void System_Move(World world){
 	var entities = world.Query(query_positionVelocity);
@@ -66,6 +66,7 @@ TODO for 0.1.0:
 - Parallel System Execution
 
 TODO Future Releases:
+- Prefabs with nesting and auto update of instances
 - Entity World Transfer
 - Remove Dependency of GCHandle to allow not blittable types like bool
 - Support for Query Any<> any groups
@@ -77,7 +78,7 @@ TODO Future Releases:
 - Api documentation
 - Extensive Testing
 - Benchmark. And speed comparison to other C# ECS systems
-
+- 
 
 Nice To have:
 - Built-in transform hierarchy

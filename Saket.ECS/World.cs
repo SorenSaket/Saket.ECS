@@ -92,12 +92,14 @@ namespace Saket.ECS
                 throw new ArgumentException("GetEntity Failed: Entity is destroyed");
 
             // If the entity.ID is within bounds
-            if(pointer.ID > 0 && pointer.ID < entities.Count)
+            if (pointer.ID > 0 && pointer.ID < entities.Count) {
                 // if the version number matches with the one stored
-                if(entities[pointer.ID].Version == pointer.Version)
+                if (entities[pointer.ID].Version == pointer.Version)
                     return new Entity(this, pointer);
+                throw new ArgumentException("GetEntity Failed: Entity doesn't anymore");
+            }
 
-            throw new ArgumentException("GetEntity Failed: Entity doesn't anymore");
+            throw new ArgumentException("GetEntity Failed: Pointer out of range");
         }
 
         /// <summary>
@@ -150,15 +152,16 @@ namespace Saket.ECS
                     // Remove from archetype
                     archetypes[old.Archetype].RemoveEntity(old.Row);
 
-                // Invalidate the pointer
-                pointer = EntityPointer.Default;
-
+                
                 // Unchecked will cause the version number to wrap around
                 unchecked
                 {
                     // Deassign archetype and increment version on the internal pointer
                     entities[pointer.ID] = new InternalEntityPointer(-1, -1, old.Version + 1);
                 }
+
+                // Invalidate the pointer
+                pointer = EntityPointer.Default;
             }
             else 
             {
@@ -177,16 +180,13 @@ namespace Saket.ECS
             resources.Add(typeof(T), resource);
         }
 
-        public T? GetResource<T>()
+        public T GetResource<T>()
         {
-            if (resources.ContainsKey(typeof(T)))
-            {
-                return (T)resources[typeof(T)];
-            }
-            return default(T);
+            return (T)resources[typeof(T)];
+            //throw new ArgumentException($"Resource of type {typeof(T)} does not exsist on world");
         }
 
-        public bool HasResource<T>(out T value)
+        public bool TryGetResource<T>(out T value)
         {
             if (resources.ContainsKey(typeof(T)))
             {

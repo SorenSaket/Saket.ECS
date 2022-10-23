@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saket.ECS", "Saket.ECS\Sake
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saket.ECS.Tests", "Saket.ECS.Tests\Saket.ECS.Tests.csproj", "{0EDF81E7-F8FA-4371-A5EF-74AB70F1D0D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saket.ECS.Benchmark", "Saket.ECS.Benchmark\Saket.ECS.Benchmark.csproj", "{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saket.ECS.Benchmark", "Saket.ECS.Benchmark\Saket.ECS.Benchmark.csproj", "{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{96375B7F-A5B9-4555-B10A-7EAC133F66D5}"
 	ProjectSection(SolutionItems) = preProject
