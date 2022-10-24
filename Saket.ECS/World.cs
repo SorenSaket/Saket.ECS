@@ -63,14 +63,14 @@ namespace Saket.ECS
             if(destroyedEntities.Count > 0)
             {
                 int id = destroyedEntities.Pop();
-                return new Entity(this, new EntityPointer(id, entities[id].Version));
+                return new Entity(this, new Pointer(id, entities[id].Version));
             }
             else
             {
                 // Create new entity 
                 // entities.Count will point to the last
                 // Version starts off at 0
-                var newEntity = new EntityPointer(entities.Count, 0);
+                var newEntity = new Pointer(entities.Count, 0);
 
                 entities.Add(new InternalEntityPointer(-1,-1,0));
 
@@ -85,14 +85,14 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="pointer"></param>
         /// <returns></returns>
-        public Entity GetEntity(EntityPointer pointer)
+        public Entity GetEntity(Pointer pointer)
         {
             // The entity exists but is destroyed
             if (destroyedEntities.Contains(pointer.ID))
                 throw new ArgumentException("GetEntity Failed: Entity is destroyed");
 
             // If the entity.ID is within bounds
-            if (pointer.ID > 0 && pointer.ID < entities.Count) {
+            if (pointer.ID >= 0 && pointer.ID < entities.Count) {
                 // if the version number matches with the one stored
                 if (entities[pointer.ID].Version == pointer.Version)
                     return new Entity(this, pointer);
@@ -107,18 +107,18 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="pointer"></param>
         /// <returns></returns>
-        public bool TryGetEntity(EntityPointer pointer, out Entity entity)
+        public bool TryGetEntity(Pointer pointer, out Entity entity)
         {
             // The entity exists but is destroyed
             if (destroyedEntities.Contains(pointer.ID))
             {
-                entity = new Entity(this, EntityPointer.Default);
+                entity = new Entity(this, Pointer.Default);
                 return false;
             }
                 
 
             // If the entity.ID is within bounds
-            if (pointer.ID > 0 && pointer.ID < entities.Count)
+            if (pointer.ID >= 0 && pointer.ID < entities.Count)
                 // if the version number matches with the one stored
                 if (entities[pointer.ID].Version == pointer.Version)
                 {
@@ -126,7 +126,7 @@ namespace Saket.ECS
                     return true;
                 }
 
-            entity = new Entity(this, EntityPointer.Default);
+            entity = new Entity(this, Pointer.Default);
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="pointer"></param>
         /// <exception cref="InvalidOperationException"> When the entity already is destroyed</exception>
-        public void DestroyEntity(ref EntityPointer pointer)
+        public void DestroyEntity(ref Pointer pointer)
         {
             // 
             if (!destroyedEntities.Contains(pointer.ID) && pointer.Valid && pointer.ID < entities.Count)
@@ -161,7 +161,7 @@ namespace Saket.ECS
                 }
 
                 // Invalidate the pointer
-                pointer = EntityPointer.Default;
+                pointer = Pointer.Default;
             }
             else 
             {
@@ -199,7 +199,8 @@ namespace Saket.ECS
 
 
         public QueryResult Query(Query query)
-        {/*
+        {
+            /*
             if (!queries.ContainsKey(query.Signature))
             {
                 queries.Add(query.Signature, GetMatchingEntities(query));

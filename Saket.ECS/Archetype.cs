@@ -26,6 +26,9 @@ namespace Saket.ECS
         /// <summary> The minimum allocated number of entities. The acutual allocation is up to the storage</summary>
         public int Capacity { get; private set; }
 
+        /// <summary> Version inceases when a entity is destroyed or created</summary>
+        public uint Version { get; private set; }
+
         /// <summary> Used to recycle rows/entities </summary>
         public Stack<int> avaliableRows = new Stack<int>();
 
@@ -57,7 +60,7 @@ namespace Saket.ECS
 
         internal int AddEntity()
         {
-
+            InceaseVersion();
             /*TODO
              // Clear reused storage 
                 int row = avaliableRows.Pop();
@@ -94,6 +97,7 @@ namespace Saket.ECS
             {
                 avaliableRows.Push(index_element);
                 Count--;
+                InceaseVersion();
             }
         }
 
@@ -133,9 +137,19 @@ namespace Saket.ECS
         {
            storage[type].Set(index_element, value);
         }
-#endregion
+        #endregion
 
         #region Other
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void InceaseVersion()
+        {
+            unchecked
+            {
+                Version++;
+            }
+        }
+
         public static int GetComponentGroupHashCode(HashSet<Type> components)
         {
             int hashCode = 31;

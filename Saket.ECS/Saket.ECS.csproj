@@ -18,4 +18,9 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Saket.Serialization\Saket.Serialization\Saket.Serialization.csproj" />
+	</ItemGroup>
+
 </Project>

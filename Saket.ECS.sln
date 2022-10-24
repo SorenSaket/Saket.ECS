@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Saket.Serialization", "..\Saket.Serialization\Saket.Serialization\Saket.Serialization.csproj", "{ABB03752-D30F-48EF-992B-A0B030439F4E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3960F636-B93B-45E5-AE73-7ECD3D7EBEDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABB03752-D30F-48EF-992B-A0B030439F4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABB03752-D30F-48EF-992B-A0B030439F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABB03752-D30F-48EF-992B-A0B030439F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABB03752-D30F-48EF-992B-A0B030439F4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

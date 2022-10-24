@@ -10,6 +10,7 @@ namespace Saket.ECS.Storage
 {
     /// <summary>
     /// Default storage type for storing components
+    /// 
     /// </summary>
     public unsafe class ComponentStorage : IComponentStorage, IDisposable
     {
@@ -85,6 +86,7 @@ namespace Saket.ECS.Storage
                     data[index * ItemSizeInBytes + y] = ptrItem[y];
                 }
             }
+            //Marshal.StructureToPtr(item, new IntPtr(data[index * ItemSizeInBytes]), true);
         }
         // MIght use these in future
         // Marshal.PtrToStructure()
@@ -93,6 +95,7 @@ namespace Saket.ECS.Storage
         // Marshal.ReAllocHGlobal
         // Marshal.PrelinkAll is interesting to avoid jit penalty runtime
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get<T>(int index) where T : unmanaged
         {
 #if DEBUG

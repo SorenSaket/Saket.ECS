@@ -33,7 +33,7 @@ namespace Saket.ECS
         {
             get
             {
-                return new Entity(world, new EntityPointer(Entities[index], world.entities[Entities[index]].Version));
+                return new Entity(world, new Pointer(Entities[index], world.entities[Entities[index]].Version));
             }
         }
 
