@@ -63,14 +63,14 @@ namespace Saket.ECS
             if(destroyedEntities.Count > 0)
             {
                 int id = destroyedEntities.Pop();
-                return new Entity(this, new Pointer(id, entities[id].Version));
+                return new Entity(this, new ECSPointer(id, entities[id].Version));
             }
             else
             {
                 // Create new entity 
                 // entities.Count will point to the last
                 // Version starts off at 0
-                var newEntity = new Pointer(entities.Count, 0);
+                var newEntity = new ECSPointer(entities.Count, 0);
 
                 entities.Add(new InternalEntityPointer(-1,-1,0));
 
@@ -85,7 +85,7 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="pointer"></param>
         /// <returns></returns>
-        public Entity GetEntity(Pointer pointer)
+        public Entity GetEntity(ECSPointer pointer)
         {
             // The entity exists but is destroyed
             if (destroyedEntities.Contains(pointer.ID))
@@ -107,12 +107,12 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="pointer"></param>
         /// <returns></returns>
-        public bool TryGetEntity(Pointer pointer, out Entity entity)
+        public bool TryGetEntity(ECSPointer pointer, out Entity entity)
         {
             // The entity exists but is destroyed
             if (destroyedEntities.Contains(pointer.ID))
             {
-                entity = new Entity(this, Pointer.Default);
+                entity = new Entity(this, ECSPointer.Default);
                 return false;
             }
                 
@@ -126,7 +126,7 @@ namespace Saket.ECS
                     return true;
                 }
 
-            entity = new Entity(this, Pointer.Default);
+            entity = new Entity(this, ECSPointer.Default);
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace Saket.ECS
         /// </summary>
         /// <param name="pointer"></param>
         /// <exception cref="InvalidOperationException"> When the entity already is destroyed</exception>
-        public void DestroyEntity(ref Pointer pointer)
+        public void DestroyEntity(ref ECSPointer pointer)
         {
             // 
             if (!destroyedEntities.Contains(pointer.ID) && pointer.Valid && pointer.ID < entities.Count)
@@ -161,7 +161,7 @@ namespace Saket.ECS
                 }
 
                 // Invalidate the pointer
-                pointer = Pointer.Default;
+                pointer = ECSPointer.Default;
             }
             else 
             {

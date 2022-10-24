@@ -6,9 +6,9 @@ namespace Saket.ECS
     /// <summary>
     /// Consists of an ID and version Number
     /// </summary>
-    public struct Pointer 
+    public struct ECSPointer 
     {
-        public static readonly Pointer Default = new(-1,0);
+        public static readonly ECSPointer Default = new(-1,0);
         
         /// <summary>
         /// If the Pointer is pointing to a potentionally valid entity
@@ -29,7 +29,7 @@ namespace Saket.ECS
         /// </summary>
         public uint Version;
 
-        public Pointer(int ID, uint version = 0)
+        public ECSPointer(int ID, uint version = 0)
         {
             this.ID = ID;
             this.Version = version;
@@ -37,9 +37,9 @@ namespace Saket.ECS
 
         public override bool Equals(object? obj)
         {
-            return obj is Pointer pointer && Equals(pointer);
+            return obj is ECSPointer pointer && Equals(pointer);
         }
-        public bool Equals(Pointer other)
+        public bool Equals(ECSPointer other)
         {
             return ID == other.ID && Version == other.Version;
         }
@@ -48,12 +48,12 @@ namespace Saket.ECS
             return HashCode.Combine(ID,Version);
         }
 
-        public static bool operator ==(Pointer left, Pointer right)
+        public static bool operator ==(ECSPointer left, ECSPointer right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(Pointer left, Pointer right)
+        public static bool operator !=(ECSPointer left, ECSPointer right)
         {
             return !(left == right);
         }

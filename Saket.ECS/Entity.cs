@@ -36,14 +36,14 @@ namespace Saket.ECS
         }
 
 
-        public Pointer EntityPointer { get => entityPointer; set{ entityPointer = value; } }
+        public ECSPointer EntityPointer { get => entityPointer; set{ entityPointer = value; } }
 
 
         public readonly World World { get; }
 
-        private Pointer entityPointer;
+        private ECSPointer entityPointer;
 
-        internal Entity(World world, Pointer pointer)
+        internal Entity(World world, ECSPointer pointer)
         {
             this.World = world;
             entityPointer = pointer;
