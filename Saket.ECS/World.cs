@@ -218,26 +218,36 @@ namespace Saket.ECS
 
             return new QueryResult(this, _entities, _archetypes);
         }
-
-
+        
         // Todo make allocation free
-        internal void GetMatchingEntities(Query query, out List<int> _entities, out List<int> _archetypes) 
-        { 
+        public List<int> QueryArchetypes(Query query, out int entityCount)
+        {
             // List of all indexes of archetypes that match query
-            _archetypes = new List<int>();
+            List<int> _archetypes = new(archetypes.Count);
             
-            // The number of entities to account for
-            int size = 0;
+            entityCount = 0;
 
             for (int i = 0; i < archetypes.Count; i++)
             {
                 // If the archetype mach to the query
-                if(Match(archetypes[i].ComponentTypes, query))
+                if (Match(archetypes[i].ComponentTypes, query))
                 {
-                    size += archetypes[i].Count;
+                    entityCount += archetypes[i].Count;
                     _archetypes.Add(i);
                 }
             }
+
+            return _archetypes;
+        }
+
+
+        // Todo make allocation free
+        internal void GetMatchingEntities(Query query, out List<int> _entities, out List<int> _archetypes)
+        {
+            // The number of entities to account for
+            int size = 0;
+            // List of all indexes of archetypes that match query
+            _archetypes = QueryArchetypes(query, out size);
 
             _entities = new List<int>(size);
 
@@ -252,6 +262,8 @@ namespace Saket.ECS
             }
         }
 
+
+        // todo add inclusive groups
         /// <summary>
         /// 
         /// </summary>

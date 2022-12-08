@@ -109,8 +109,9 @@ namespace Saket.ECS.Storage
         #endregion
 
         #region Pointer based IComponentStorage
-        
+
         /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Set(int index, void* item)
         {
 #if DEBUG
@@ -131,6 +132,7 @@ namespace Saket.ECS.Storage
         }
 
         /// <exception cref="ArgumentOutOfRangeException">The index is out of range</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void* Get(int index)
         {
 #if DEBUG
