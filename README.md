@@ -91,6 +91,7 @@ TODO for 0.1.0:
 
 
 TODO Future Releases:
+- Auto reuse memory with Chunking.
 - Prefabs with nesting and auto update of instances
 - Entity World Transfer
 - Remove Dependency of GCHandle to allow not blittable types like bool

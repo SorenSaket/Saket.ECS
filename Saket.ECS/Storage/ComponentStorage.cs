@@ -78,13 +78,11 @@ namespace Saket.ECS.Storage
 #endif
             fixed (T* ptr = &item)
             {
-                // Get pointer to item
-                byte* ptrItem = (byte*)ptr;
-                // Copy all bytes
-                for (int y = 0; y < ItemSizeInBytes; y++)
-                {
-                    data[index * ItemSizeInBytes + y] = ptrItem[y];
-                }
+                Buffer.MemoryCopy(
+                    ptr,
+                    &data[ItemSizeInBytes * index],
+                    ItemSizeInBytes,
+                    ItemSizeInBytes);
             }
             //Marshal.StructureToPtr(item, new IntPtr(data[index * ItemSizeInBytes]), true);
         }
