@@ -195,11 +195,13 @@ namespace Saket.ECS
 			World.entities[EntityPointer.ID] = new InternalEntityPointer(newArchetypeIndex, newEntityRow, World.entities[EntityPointer.ID].Version);
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get<T>()
             where T : unmanaged
         {
             return World.archetypes[Archetype].Get<T>(Row);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? TryGet<T>()
           where T : unmanaged
         {
@@ -207,26 +209,29 @@ namespace Saket.ECS
 				return World.archetypes[Archetype].Get<T>(Row);
 			return null;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>()
           where T : unmanaged
         {
             return World.archetypes[Archetype].Has<T>();
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Type type)
         {
             return World.archetypes[Archetype].Has(type);
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set<T>(T value)
              where T : unmanaged
         {
             World.archetypes[Archetype].Set<T>(Row, value);
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void* Get(Type type)
         {
             return World.archetypes[Archetype].storage[type].Get(Row);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Set(Type type, void* value)
         {
             World.archetypes[Archetype].storage[type].Set(Row, value);
