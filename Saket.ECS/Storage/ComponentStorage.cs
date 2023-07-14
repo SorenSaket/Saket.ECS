@@ -102,8 +102,22 @@ namespace Saket.ECS.Storage
             if (index >= Capacity || index < 0)
                 throw new ArgumentOutOfRangeException("Index out of range");
 #endif
+            // convert the byte pointer to a T-pointer and index into it normally
             return ((T*)data)[index];
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T GetRef<T>(int index) where T : unmanaged
+        {
+#if DEBUG
+            if (!typeof(T).Equals(ComponentType))
+                throw new ArgumentException("Object is not the same type as storage");
+            if (index >= Capacity || index < 0)
+                throw new ArgumentOutOfRangeException("Index out of range");
+#endif
+            return ref Unsafe.AsRef<T>((void*)data[index]);
+        }
+
         #endregion
 
         #region Pointer based IComponentStorage
@@ -168,7 +182,7 @@ namespace Saket.ECS.Storage
 #endif
             for (int i = 0; i < ItemSizeInBytes; i++)
             {
-                (data[ItemSizeInBytes * index]) = 0;
+                (data[ItemSizeInBytes * index + i]) = 0;
             }
         }
     }

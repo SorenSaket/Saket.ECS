@@ -60,7 +60,6 @@ namespace Saket.ECS
         }
 
 
-
         /// <summary>
         /// Extracts all types from eventual tuple
         /// </summary>

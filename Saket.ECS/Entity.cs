@@ -13,7 +13,7 @@ namespace Saket.ECS
     /// <summary>
     /// A Handle to an entity
     /// </summary>
-    public struct Entity
+    public struct Entity : IEquatable<Entity>
     {
         public bool Destroyed
         {
@@ -43,7 +43,7 @@ namespace Saket.ECS
 
         private ECSPointer entityPointer;
 
-        internal Entity(World world, ECSPointer pointer)
+        public Entity(World world, ECSPointer pointer)
         {
             this.World = world;
             entityPointer = pointer;
@@ -202,6 +202,13 @@ namespace Saket.ECS
             return World.archetypes[Archetype].Get<T>(Row);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T GetRef<T>()
+        where T : unmanaged
+        {
+            return ref World.archetypes[Archetype].GetRef<T>(Row);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? TryGet<T>()
           where T : unmanaged
         {
@@ -235,6 +242,32 @@ namespace Saket.ECS
         public unsafe void Set(Type type, void* value)
         {
             World.archetypes[Archetype].storage[type].Set(Row, value);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Entity entity && Equals(entity);
+        }
+
+        public bool Equals(Entity other)
+        {
+            return EqualityComparer<World>.Default.Equals(World, other.World) &&
+                   EqualityComparer<ECSPointer>.Default.Equals(entityPointer, other.entityPointer);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(World, entityPointer);
+        }
+
+        public static bool operator ==(Entity left, Entity right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Entity left, Entity right)
+        {
+            return !(left == right);
         }
     }
 }

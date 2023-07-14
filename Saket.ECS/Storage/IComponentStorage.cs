@@ -37,6 +37,7 @@ namespace Saket.ECS.Storage
         // Safe
 
         public T Get<T>(int index) where T : unmanaged;
+        public ref T GetRef<T>(int index) where T : unmanaged;
 
         public void Set<T>(int index, in T value) where T : unmanaged;
 

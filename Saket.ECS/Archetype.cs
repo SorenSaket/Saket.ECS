@@ -108,7 +108,7 @@ namespace Saket.ECS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        /// [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>()
         {
             return ComponentTypes.Contains(typeof(T));
@@ -124,6 +124,14 @@ namespace Saket.ECS
         {
             return storage[typeof(T)].Get<T>(index_element);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T GetRef<T>(int index_element)
+           where T : unmanaged
+        {
+            return ref storage[typeof(T)].GetRef<T>(index_element);
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set<T>(int index_element, T value)
             where T : unmanaged
