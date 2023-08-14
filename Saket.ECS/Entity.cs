@@ -35,7 +35,6 @@ namespace Saket.ECS
             get => World.entities[ID].Row;
         }
 
-
         public ECSPointer EntityPointer { get => entityPointer; set{ entityPointer = value; } }
 
 
@@ -138,7 +137,7 @@ namespace Saket.ECS
                 throw new Exception("Cannot copy to archetype since entity is not registered in any archetype");
             }
 #endif
-            Archetype currentArchetype = World.archetypes[Archetype];
+            Archetype currentArchetype = World.Archetypes[Archetype];
 
             foreach (var storage_from in currentArchetype.storage)
             {
@@ -157,7 +156,7 @@ namespace Saket.ECS
 		{
 			if (Archetype != -1)
 			{
-				Archetype currentArchetype = World.archetypes[Archetype];
+				Archetype currentArchetype = World.Archetypes[Archetype];
 
 				return new HashSet<Type>(currentArchetype.ComponentTypes);
 			}
@@ -170,7 +169,7 @@ namespace Saket.ECS
             
 			if (Archetype != -1)
 			{
-				currentArchetype = World.archetypes[Archetype];
+				currentArchetype = World.Archetypes[Archetype];
                 // If the new archetype is the same as old
                 if (currentArchetype.ComponentTypes.SetEquals(components))
 				{
@@ -199,49 +198,50 @@ namespace Saket.ECS
         public T Get<T>()
             where T : unmanaged
         {
-            return World.archetypes[Archetype].Get<T>(Row);
+            return World.Archetypes[Archetype].Get<T>(Row);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetRef<T>()
         where T : unmanaged
         {
-            return ref World.archetypes[Archetype].GetRef<T>(Row);
+            return ref World.Archetypes[Archetype].GetRef<T>(Row);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? TryGet<T>()
           where T : unmanaged
         {
-			if(World.archetypes[Archetype].Has<T>())
-				return World.archetypes[Archetype].Get<T>(Row);
+			if(World.Archetypes[Archetype].Has<T>())
+				return World.Archetypes[Archetype].Get<T>(Row);
 			return null;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>()
           where T : unmanaged
         {
-            return World.archetypes[Archetype].Has<T>();
+            return World.Archetypes[Archetype].Has<T>();
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Type type)
         {
-            return World.archetypes[Archetype].Has(type);
+            return World.Archetypes[Archetype].Has(type);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set<T>(T value)
              where T : unmanaged
         {
-            World.archetypes[Archetype].Set<T>(Row, value);
+            World.Archetypes[Archetype].Set<T>(Row, value);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void* Get(Type type)
         {
-            return World.archetypes[Archetype].storage[type].Get(Row);
+            return World.Archetypes[Archetype].storage[type].Get(Row);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Set(Type type, void* value)
         {
-            World.archetypes[Archetype].storage[type].Set(Row, value);
+            World.Archetypes[Archetype].storage[type].Set(Row, value);
         }
 
         public override bool Equals(object? obj)

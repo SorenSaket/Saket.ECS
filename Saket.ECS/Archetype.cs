@@ -140,6 +140,17 @@ namespace Saket.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe T* GetUnsafe<T>(int index_element) where T: unmanaged
+        {
+            return (T*) storage[typeof(T)].Get(index_element);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void SetUnsafe<T>( int index_element, void* value)
+        {
+            storage[typeof(T)].Set(index_element, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void* Get(Type type, int index_element)
         {
             return storage[type].Get(index_element);

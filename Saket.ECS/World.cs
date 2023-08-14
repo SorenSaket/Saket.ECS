@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Saket.ECS
 {
@@ -17,7 +18,7 @@ namespace Saket.ECS
         public float Delta { get; set; }
 
         //
-        public List<Archetype> archetypes;
+        public List<Archetype> Archetypes;
 
         /// <summary> 
         /// All the entities currently in the world. 
@@ -46,10 +47,13 @@ namespace Saket.ECS
         internal Stack<int> destroyedEntities;
 
 
+
+        private List<int> temp = new List<int>();
+ 
         public World()
         {
             const int initialSize = 1024;
-            this.archetypes = new List<Archetype>();
+            this.Archetypes = new List<Archetype>();
             this.entities = new List<InternalEntityPointer>(initialSize);
             this.destroyedEntities = new();
             this.resources = new();
@@ -150,7 +154,7 @@ namespace Saket.ECS
                 // If the entity was assigned an archetype
                 if (old.Archetype != -1 && old.Row != -1)
                     // Remove from archetype
-                    archetypes[old.Archetype].RemoveEntity(old.Row);
+                    Archetypes[old.Archetype].RemoveEntity(old.Row);
 
                 
                 // Unchecked will cause the version number to wrap around
@@ -200,67 +204,65 @@ namespace Saket.ECS
 
         public QueryResult Query(Query query)
         {
-            /*
-            if (!queries.ContainsKey(query.Signature))
-            {
-                queries.Add(query.Signature, GetMatchingEntities(query));
-                queriesdirty.Add(query.Signature, false);
-            }
-            else if(queriesdirty[query.Signature])
-            {
-                queries[query.Signature] = GetMatchingEntities(query);
-                queriesdirty[query.Signature] = false;
-            }
+            // The number of entities to account for
+            int entityCount = 0;
+           
+            List<int> _archetypes = new List<int>();
 
-            return new QueryResult(this, queries[query.Signature]);*/
-
-            GetMatchingEntities(query, out var _entities, out var _archetypes);
-
-            return new QueryResult(this, _entities, _archetypes);
-        }
-        
-        // Todo make allocation free
-        public List<int> QueryArchetypes(Query query, out int entityCount)
-        {
             // List of all indexes of archetypes that match query
-            List<int> _archetypes = new(archetypes.Count);
-            
-            entityCount = 0;
 
-            for (int i = 0; i < archetypes.Count; i++)
+            for (int i = 0; i < Archetypes.Count; i++)
             {
                 // If the archetype mach to the query
-                if (Match(archetypes[i].ComponentTypes, query))
+                if (Match(Archetypes[i].ComponentTypes, query))
                 {
-                    entityCount += archetypes[i].Count;
+                    entityCount += Archetypes[i].Count;
                     _archetypes.Add(i);
                 }
             }
 
-            return _archetypes;
-        }
-
-
-        // Todo make allocation free
-        internal void GetMatchingEntities(Query query, out List<int> _entities, out List<int> _archetypes)
-        {
-            // The number of entities to account for
-            int size = 0;
-            // List of all indexes of archetypes that match query
-            _archetypes = QueryArchetypes(query, out size);
-
-            _entities = new List<int>(size);
-
+            List<int> _entities = new List<int>();
             // iterate over all entities matching their archetype 
             // 
             // TODO this is slow
             for (int i = 0; i < entities.Count; i++)
             {
-                if (_archetypes.Contains(entities[i].Archetype) )
-                    if(!archetypes[entities[i].Archetype].avaliableRows.Contains(entities[i].Row)) // Do not include deleted entities.
+                if (_archetypes.Contains(entities[i].Archetype))
+                    if (!Archetypes[entities[i].Archetype].avaliableRows.Contains(entities[i].Row)) // Do not include deleted entities. (This is also slow)
                         _entities.Add(i);
             }
+
+            return new QueryResult(this, _entities, _archetypes);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="_archetypes"></param>
+        /// <param name="entityCount"></param>
+        /// <returns>the number of matching archetypes</returns>
+        public int QueryArchetypes(Query query, ref List<Archetype> _archetypes, out int entityCount)
+        {
+            // List of all indexes of archetypes that match query
+            _archetypes.Clear();
+            Int32 archetypeCount = 0;
+            entityCount = 0;
+
+            for (int i = 0; i < Archetypes.Count; i++)
+            {
+                // If the archetype mach to the query
+                if (Match(Archetypes[i].ComponentTypes, query))
+                {
+                    archetypeCount++;
+                    entityCount += Archetypes[i].Count;
+                    _archetypes.Add(Archetypes[i]);
+                }
+            }
+
+            return archetypeCount;
+        }
+        
 
 
         // todo add inclusive groups
@@ -270,6 +272,7 @@ namespace Saket.ECS
         /// <param name="components"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool Match(HashSet<Type> components, Query filter)
         {
             foreach (var item in filter.Inclusive)
@@ -296,20 +299,20 @@ namespace Saket.ECS
             int hash = Archetype.GetComponentGroupHashCode(types);
 
             // Iterate all archetypes and search one that matches hash
-            for (int i = 0; i < archetypes.Count; i++)
+            for (int i = 0; i < Archetypes.Count; i++)
             {
                 // If combination already exists
-                if(archetypes[i].ID == hash)
+                if(Archetypes[i].ID == hash)
                 {
                     index = i;
-                    return archetypes[i];
+                    return Archetypes[i];
                 }
             }
 
             // Seach unsuccessful. Create new Archetype
             var arc = new Archetype(types);
-            archetypes.Add(arc);
-            index = archetypes.Count - 1;
+            Archetypes.Add(arc);
+            index = Archetypes.Count - 1;
             return arc;
         }
 
@@ -322,7 +325,7 @@ namespace Saket.ECS
             destroyedEntities.Clear();
             entities.Clear();
 
-            foreach (var archetype in archetypes)
+            foreach (var archetype in Archetypes)
             {
                 archetype.Clear();
             }
@@ -340,11 +343,11 @@ namespace Saket.ECS
             other.entities = new List<InternalEntityPointer>(other.entities);
 
             // Overwrite all archetypes
-            foreach (var archetype in archetypes)
+            foreach (var archetype in Archetypes)
             {
                 other.CreateOrGetArchetype(archetype.ComponentTypes, out int index);
 
-                archetype.Overwrite(other.archetypes[index]);
+                archetype.Overwrite(other.Archetypes[index]);
             }
         }
 
