@@ -16,7 +16,7 @@ namespace Saket.ECS
     {
         /// <summary> Time delta in seconds </summary>
         public float Delta { get; set; }
-
+        public float Time { get; set; }
         //
         public List<Archetype> Archetypes;
 

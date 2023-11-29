@@ -20,9 +20,8 @@ namespace Saket.ECS
             Stages = new List<IStage>();
         }
 
-        public void Update(World world, float delta)
+        public void Update(World world)
         {
-            world.Delta = delta;
             for (int i = 0; i < Stages.Count; i++)
             {
                 Stages[i].Update(world);
