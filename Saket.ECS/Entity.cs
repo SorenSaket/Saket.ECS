@@ -77,6 +77,80 @@ namespace Saket.ECS
             return this;
         }
 
+        public Entity Add<T1, T2>(
+            T1 component1, 
+            T2 component2)
+                where T1 : unmanaged
+                where T2 : unmanaged
+        {
+			HashSet<Type> newComponents = GetExsistingComponentTypes();
+			newComponents.Add(typeof(T1));
+            newComponents.Add(typeof(T2));
+
+            MoveToNewArchetype(newComponents, out var newArchetype);
+
+            // Set new value
+            newArchetype.Set(Row, component1);
+            newArchetype.Set(Row, component2);
+
+            return this;
+        }
+
+        public Entity Add<T1, T2, T3>(
+            T1 component1, 
+            T2 component2, 
+            T3 component3)
+                where T1 : unmanaged
+                where T2 : unmanaged
+                where T3 : unmanaged
+        {
+            HashSet<Type> newComponents = GetExsistingComponentTypes();
+            newComponents.Add(typeof(T1));
+            newComponents.Add(typeof(T2));
+            newComponents.Add(typeof(T3));
+
+            MoveToNewArchetype(newComponents, out var newArchetype);
+
+            // Set new value
+            newArchetype.Set(Row, component1);
+            newArchetype.Set(Row, component2);
+            newArchetype.Set(Row, component3);
+
+            return this;
+        }
+
+
+        public Entity Add<T1, T2, T3, T4>(
+      T1 component1,
+      T2 component2,
+      T3 component3,
+       T4 component4)
+          where T1 : unmanaged
+          where T2 : unmanaged
+          where T3 : unmanaged
+          where T4 : unmanaged
+        {
+            HashSet<Type> newComponents = GetExsistingComponentTypes();
+            newComponents.Add(typeof(T1));
+            newComponents.Add(typeof(T2));
+            newComponents.Add(typeof(T3));
+            newComponents.Add(typeof(T4));
+
+            MoveToNewArchetype(newComponents, out var newArchetype);
+
+            // Set new value
+            newArchetype.Set(Row, component1);
+            newArchetype.Set(Row, component2);
+            newArchetype.Set(Row, component3);
+            newArchetype.Set(Row, component4);
+
+            return this;
+        }
+
+
+
+
+
         /// <summary>
         /// Removes component from entity
         /// </summary>
