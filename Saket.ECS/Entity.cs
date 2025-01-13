@@ -146,7 +146,72 @@ namespace Saket.ECS
 
             return this;
         }
+        public Entity Add<T1, T2, T3, T4, T5>(
+  T1 component1,
+  T2 component2,
+  T3 component3,
+  T4 component4,
+  T5 component5)
+      where T1 : unmanaged
+      where T2 : unmanaged
+      where T3 : unmanaged
+      where T4 : unmanaged
+      where T5 : unmanaged
+        {
+            HashSet<Type> newComponents = GetExsistingComponentTypes();
+            newComponents.Add(typeof(T1));
+            newComponents.Add(typeof(T2));
+            newComponents.Add(typeof(T3));
+            newComponents.Add(typeof(T4));
+            newComponents.Add(typeof(T5));
 
+            MoveToNewArchetype(newComponents, out var newArchetype);
+
+            // Set new value
+            newArchetype.Set(Row, component1);
+            newArchetype.Set(Row, component2);
+            newArchetype.Set(Row, component3);
+            newArchetype.Set(Row, component4);
+            newArchetype.Set(Row, component5);
+
+            return this;
+        }
+
+
+        public Entity Add<T1, T2, T3, T4, T5, T6>(
+      T1 component1,
+      T2 component2,
+      T3 component3,
+      T4 component4,
+      T5 component5,
+       T6 component6)
+          where T1 : unmanaged
+          where T2 : unmanaged
+          where T3 : unmanaged
+          where T4 : unmanaged
+          where T5 : unmanaged
+          where T6 : unmanaged
+        {
+            HashSet<Type> newComponents = GetExsistingComponentTypes();
+            newComponents.Add(typeof(T1));
+            newComponents.Add(typeof(T2));
+            newComponents.Add(typeof(T3));
+            newComponents.Add(typeof(T4));
+            newComponents.Add(typeof(T5));
+            newComponents.Add(typeof(T6));
+
+            MoveToNewArchetype(newComponents, out var newArchetype);
+
+            // Set new value
+            newArchetype.Set(Row, component1);
+            newArchetype.Set(Row, component2);
+            newArchetype.Set(Row, component3);
+            newArchetype.Set(Row, component4);
+            newArchetype.Set(Row, component5);
+            newArchetype.Set(Row, component6);
+
+            return this;
+        }
 
 
 
