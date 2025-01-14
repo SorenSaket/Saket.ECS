@@ -24,12 +24,12 @@ namespace Saket.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => EntityPointer.ID; 
         }
-        internal int Archetype
+        public int Archetype
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => World.entities[ID].Archetype;
         }
-        internal int Row
+        public int Row
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => World.entities[ID].Row;
