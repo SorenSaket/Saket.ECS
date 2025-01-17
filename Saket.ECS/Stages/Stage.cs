@@ -75,6 +75,11 @@ namespace Saket.ECS
             return this;
         }
 
+        public Stage Add(Span<DelegateSystem> @delegates)
+        {
+            systems.AddRange(@delegates);
+            return this;
+        }
         public void Update(World world)
         {
             for (int i = 0; i < systems.Count; i++)
