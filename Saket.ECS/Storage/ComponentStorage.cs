@@ -115,7 +115,7 @@ namespace Saket.ECS.Storage
             if (index >= Capacity || index < 0)
                 throw new ArgumentOutOfRangeException("Index out of range");
 #endif
-            return ref Unsafe.AsRef<T>((void*)data[index]);
+            return ref Unsafe.AsRef<T>(((T*)data)[index]);
         }
 
         #endregion

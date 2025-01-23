@@ -15,7 +15,7 @@ namespace Saket.ECS
     public class World :  IEnumerable<Entity>
     {
         /// <summary> Time delta in seconds </summary>
-        public float Delta { get; set; }
+        public float DeltaTime { get; set; }
         public float Time { get; set; }
         //
         public List<Archetype> Archetypes;
